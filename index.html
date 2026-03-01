@@ -1,0 +1,2637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- ═══ PWA Meta Tags ═══ -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="重启系统">
+  <meta name="theme-color" content="#4E7354">
+  <meta name="msapplication-TileColor" content="#4E7354">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <!-- ═══ END PWA Meta Tags ═══ -->
+
+<title>人生重启系统 2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Variables ─────────────────────────────────────────── */
+:root {
+  --cream:    #FBF8F3;
+  --paper:    #F5F0E8;
+  --warm:     #EDE5D8;
+  --green:    #4E7354;
+  --green-l:  #7FA882;
+  --green-bg: #EEF5EF;
+  --rose:     #A85468;
+  --rose-l:   #C47A8A;
+  --rose-bg:  #F8EEF1;
+  --amber:    #B87533;
+  --amber-l:  #D4975A;
+  --amber-bg: #FBF2E6;
+  --teal:     #3B7A8F;
+  --teal-l:   #5FA0B5;
+  --teal-bg:  #E8F3F7;
+  --purple:   #6B5A9E;
+  --purple-bg:#F0ECF8;
+  --text:     #2D2520;
+  --text-mid: #5C4F47;
+  --text-soft:#9A8F88;
+  --border:   #D9D0C4;
+  --shadow:   rgba(45,37,32,0.10);
+  --shadow-d: rgba(45,37,32,0.18);
+  --radius:   14px;
+  --radius-sm:8px;
+}
+
+/* ── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Top Nav ─────────────────────────────────────────────── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(251,248,243,0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  padding-left: max(32px, env(safe-area-inset-left));
+  padding-right: max(32px, env(safe-area-inset-right));
+  display: flex; align-items: center; gap: 24px;
+  height: 62px;
+}
+.topbar-logo {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 17px; font-weight: 700;
+  color: var(--green);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+}
+.topbar-logo span { font-size: 20px; }
+.topbar-nav { display: flex; gap: 4px; flex: 1; }
+.nav-btn {
+  padding: 6px 16px;
+  border: none; background: none; cursor: pointer;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13.5px; font-weight: 500;
+  color: var(--text-mid);
+  border-radius: 20px;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.nav-btn:hover { background: var(--warm); color: var(--text); }
+.nav-btn.active { background: var(--green); color: #fff; }
+.topbar-save {
+  margin-left: auto;
+  padding: 7px 18px;
+  border: 1.5px solid var(--green);
+  background: transparent;
+  color: var(--green);
+  border-radius: 20px;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13px; cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.topbar-save:hover { background: var(--green); color: #fff; }
+.topbar-save.saved { background: var(--green); color: #fff; }
+
+/* ── Main ─────────────────────────────────────────────── */
+.main { flex: 1; padding: 36px 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+/* ── Views ─────────────────────────────────────────────── */
+.view { display: none; }
+.view.active { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Section headers ─────────────────────────────────────── */
+.section-banner {
+  border-radius: var(--radius);
+  padding: 28px 36px;
+  margin-bottom: 32px;
+  position: relative; overflow: hidden;
+}
+.section-banner::before {
+  content: '';
+  position: absolute; top: -30px; right: -30px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  pointer-events: none;
+}
+.section-banner .part-label {
+  font-size: 11px; font-weight: 500; letter-spacing: 2px;
+  text-transform: uppercase; opacity: .75; margin-bottom: 6px;
+  color: #fff;
+}
+.section-banner h1 {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 26px; font-weight: 700; color: #fff;
+  margin-bottom: 6px;
+}
+.section-banner p { color: rgba(255,255,255,0.82); font-size: 13.5px; }
+
+/* ── Cards ─────────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 24px;
+  box-shadow: 0 2px 12px var(--shadow);
+  transition: box-shadow .2s, transform .15s;
+}
+.card:hover { box-shadow: 0 4px 20px var(--shadow-d); }
+.card-sm { padding: 16px 20px; }
+
+/* ── Grid ─────────────────────────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+
+/* ── Vision ─────────────────────────────────────────────── */
+.vision-area { position: relative; }
+.vision-text {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 15px; line-height: 2;
+  color: var(--text);
+  white-space: pre-wrap;
+  min-height: 80px;
+}
+.vision-text.placeholder { color: var(--text-soft); font-style: italic; }
+.edit-inline-btn {
+  position: absolute; top: 0; right: 0;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  background: #fff; border-radius: 20px;
+  font-size: 12px; color: var(--text-soft);
+  cursor: pointer; transition: all .2s;
+}
+.edit-inline-btn:hover { border-color: var(--green); color: var(--green); }
+
+/* ── Dept Cards ─────────────────────────────────────────── */
+.dept-card {
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 2px 12px var(--shadow);
+  transition: all .2s; cursor: pointer;
+}
+.dept-card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px var(--shadow-d); }
+.dept-card-header {
+  padding: 20px 22px 16px;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.dept-emoji { font-size: 28px; line-height: 1; margin-top: 2px; }
+.dept-card-title { font-family: 'Noto Serif SC', serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.dept-card-sub { font-size: 12px; color: var(--text-soft); line-height: 1.5; }
+.dept-card-body { padding: 0 22px 18px; }
+.dept-stat { display: flex; gap: 8px; flex-wrap: wrap; }
+.stat-badge {
+  font-size: 11.5px; padding: 3px 10px;
+  border-radius: 12px; font-weight: 500;
+}
+.dept-card-footer {
+  padding: 12px 22px;
+  border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--text-soft);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.view-btn-sm {
+  font-size: 12px; color: var(--green); font-weight: 500;
+  background: none; border: none; cursor: pointer;
+}
+
+/* ── Project Items ─────────────────────────────────────── */
+.project-group { margin-bottom: 28px; }
+.project-group-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 14px; font-weight: 600;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.project-list { display: flex; flex-direction: column; gap: 10px; }
+.project-item {
+  background: #fff; border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  padding: 14px 18px 14px 22px;
+  display: flex; align-items: flex-start; gap: 12px;
+  position: relative; overflow: hidden;
+  transition: box-shadow .2s;
+}
+.project-item:hover { box-shadow: 0 3px 14px var(--shadow); }
+.project-item::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+.project-item-body { flex: 1; }
+.project-item-name {
+  font-size: 14px; font-weight: 500;
+  margin-bottom: 4px; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+.project-item-desc { font-size: 13px; color: var(--text-mid); line-height: 1.65; }
+.project-item-actions {
+  display: flex; gap: 6px; opacity: 0; transition: opacity .2s;
+  flex-shrink: 0; padding-top: 2px;
+}
+.project-item:hover .project-item-actions { opacity: 1; }
+.icon-btn {
+  width: 28px; height: 28px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; transition: all .15s; color: var(--text-soft);
+}
+.icon-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+.icon-btn.del:hover { border-color: var(--rose); color: var(--rose); background: var(--rose-bg); }
+.status-badge {
+  font-size: 11px; padding: 2px 9px;
+  border-radius: 10px; font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Daily Schedule ─────────────────────────────────────── */
+.schedule-block { margin-bottom: 28px; }
+.schedule-header {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 10px;
+  color: #fff; font-weight: 600; font-size: 14px;
+}
+.schedule-table {
+  width: 100%; border-collapse: collapse;
+  background: #fff;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border); border-top: none;
+}
+.schedule-table th {
+  padding: 9px 14px; font-size: 12px; font-weight: 600;
+  color: var(--text-soft); text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--paper);
+}
+.schedule-table td {
+  padding: 10px 14px; font-size: 13px;
+  border-bottom: 1px solid var(--warm);
+  vertical-align: middle;
+}
+.schedule-table tr:last-child td { border-bottom: none; }
+.schedule-table tr:hover td { background: var(--cream); }
+.time-cell { font-weight: 600; color: var(--text-mid); white-space: nowrap; min-width: 80px; }
+.check-cell { cursor: pointer; }
+.check-box {
+  width: 18px; height: 18px; border-radius: 5px;
+  border: 1.5px solid var(--border);
+  background: #fff; cursor: pointer;
+  transition: all .15s;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: transparent;
+}
+.check-box.checked { background: var(--green); border-color: var(--green); color: #fff; }
+.source-tag {
+  font-size: 11px; padding: 2px 8px;
+  border-radius: 10px; white-space: nowrap;
+}
+.schedule-add-btn {
+  width: 100%; padding: 9px;
+  border: 1.5px dashed var(--border);
+  background: none; border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  cursor: pointer; color: var(--text-soft); font-size: 13px;
+  transition: all .2s; margin-top: -1px;
+}
+.schedule-add-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+
+/* ── Goals ─────────────────────────────────────────────── */
+.goals-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.goal-card {
+  border-radius: var(--radius-sm); padding: 16px;
+  border: 1px solid var(--border);
+}
+.goal-card-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
+.goal-card-text { font-size: 13px; color: var(--text-mid); line-height: 1.7; min-height: 40px; }
+
+/* ── Nutrition ─────────────────────────────────────────── */
+.nutrition-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.nutrition-list { list-style: none; }
+.nutrition-list li {
+  padding: 7px 0; font-size: 13px;
+  border-bottom: 1px solid var(--warm);
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text-mid);
+}
+.nutrition-list li:last-child { border-bottom: none; }
+
+/* ── Reflection ─────────────────────────────────────────── */
+.reflection-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.reflection-row {
+  background: #fff; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.reflection-label {
+  padding: 10px 16px;
+  font-size: 12.5px; font-weight: 600; color: #fff;
+}
+.reflection-area {
+  padding: 12px 16px;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13px; color: var(--text-mid);
+  min-height: 70px; width: 100%;
+  border: none; outline: none; background: #fff;
+  resize: vertical; line-height: 1.7;
+}
+
+/* ── Add button ─────────────────────────────────────────── */
+.add-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 18px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: none; cursor: pointer;
+  color: var(--text-soft); font-size: 13px;
+  transition: all .2s; width: 100%; justify-content: center;
+}
+.add-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+
+/* ── Section title ─────────────────────────────────────── */
+.section-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 19px; font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.sub-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 15px; font-weight: 600;
+  margin-bottom: 14px; color: var(--text);
+}
+
+/* ── Modal ─────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(45,37,32,0.45);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: #fff; border-radius: var(--radius);
+  padding: 32px; width: 100%; max-width: 560px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  transform: scale(.95) translateY(10px);
+  transition: transform .2s;
+  position: relative;
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+.modal-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 18px; font-weight: 700;
+  margin-bottom: 22px; color: var(--text);
+}
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--border); background: #fff;
+  cursor: pointer; font-size: 16px; color: var(--text-soft);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.modal-close:hover { background: var(--warm); }
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block; font-size: 12.5px; font-weight: 600;
+  color: var(--text-mid); margin-bottom: 6px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13.5px; color: var(--text);
+  background: #fff; outline: none;
+  transition: border-color .15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--green);
+}
+.form-textarea { min-height: 100px; resize: vertical; line-height: 1.7; }
+.form-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235C4F47' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+.btn-primary {
+  padding: 10px 22px;
+  background: var(--green); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13.5px; font-weight: 500; cursor: pointer;
+  transition: background .15s;
+}
+.btn-primary:hover { background: var(--green-l); }
+.btn-secondary {
+  padding: 10px 22px;
+  background: var(--paper); color: var(--text-mid);
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13.5px; cursor: pointer;
+  transition: all .15s;
+}
+.btn-secondary:hover { border-color: var(--text-soft); }
+
+/* ── Dept detail breadcrumb ─────────────────────────────── */
+.breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text-soft);
+  margin-bottom: 24px;
+}
+.breadcrumb a { color: var(--green); cursor: pointer; text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+
+/* ── Progress bar ─────────────────────────────────────────── */
+.progress-bar-wrap { background: var(--warm); border-radius: 4px; height: 6px; }
+.progress-bar-fill { height: 6px; border-radius: 4px; transition: width .4s; }
+
+/* ── Tabs ─────────────────────────────────────────────── */
+.tabs { display: flex; gap: 6px; margin-bottom: 22px; }
+.tab {
+  padding: 7px 18px; border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: #fff; cursor: pointer;
+  font-size: 13px; color: var(--text-mid);
+  transition: all .15s; font-family: 'Noto Sans SC', sans-serif;
+}
+.tab:hover { border-color: var(--text-soft); }
+.tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+/* ── Tooltip & misc ─────────────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
+.mt-12 { margin-top: 12px; }
+.mt-20 { margin-top: 20px; }
+.mt-28 { margin-top: 28px; }
+.mb-16 { margin-bottom: 16px; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.text-soft { color: var(--text-soft); font-size: 12.5px; }
+.toast {
+  position: fixed; bottom: 30px; right: 30px; z-index: 999;
+  background: var(--text); color: #fff;
+  padding: 12px 22px; border-radius: var(--radius-sm);
+  font-size: 13.5px; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  transform: translateY(20px); opacity: 0;
+  transition: all .3s;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* ── Mindmap ─────────────────────────────────────────────── */
+.mm-ctrl-btn {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(251,248,243,0.95);
+  cursor: pointer; font-size: 13px;
+  color: var(--text-mid);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all .15s;
+  font-family: 'Noto Sans SC', sans-serif;
+  white-space: nowrap;
+  padding: 7px 11px;
+  display: block; width: 100%;
+  text-align: center;
+}
+.mm-ctrl-btn:hover { background: #fff; border-color: var(--green); color: var(--green); }
+.mm-ctrl-btn.active { background: var(--green) !important; color: #fff !important; border-color: var(--green) !important; }
+#mm-wrap { background-color: #F7F3EE; background-image: radial-gradient(circle, #D9D0C4 1px, transparent 1px); background-size: 28px 28px; }
+.mm-nav-btn { background: linear-gradient(135deg,#4E7354,#3B7A8F) !important; color: #fff !important; }
+.mm-nav-btn.active { background: linear-gradient(135deg,#3B6343,#2A5F70) !important; }
+
+/* ── Daily Module ────────────────────────────────────────── */
+.module-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 10px;
+  font-size: 11.5px; font-weight: 600; cursor: pointer;
+  border: 1.5px solid; transition: all .15s;
+}
+.module-chip:hover { filter: brightness(0.94); transform: translateY(-1px); }
+.module-step {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 13px 16px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+}
+.module-step-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; line-height: 1; }
+.module-step-label { font-size: 11.5px; font-weight: 700; color: var(--text-soft); margin-bottom: 3px; letter-spacing: .3px; }
+.module-step-text { font-size: 13.5px; color: var(--text-mid); line-height: 1.7; }
+.module-notes {
+  margin-top: 16px; padding: 14px 16px;
+  background: var(--amber-bg); border-radius: 10px;
+  border-left: 3px solid var(--amber);
+  font-size: 13px; color: var(--text-mid); line-height: 1.75;
+}
+.project-module-section {
+  margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px;
+}
+.module-collapsed-preview {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-radius: 8px; cursor: pointer;
+  transition: background .15s;
+}
+.module-collapsed-preview:hover { background: var(--cream); }
+.schedule-module-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 8px; font-size: 11px;
+  font-weight: 600; cursor: pointer; border: 1.5px solid;
+  background: none; transition: all .15s; white-space: nowrap;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+.schedule-module-btn:hover { filter: brightness(.93); }
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .main { padding: 20px 16px; }
+  .topbar { padding: 0 16px; gap: 12px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .goals-grid { grid-template-columns: 1fr; }
+  .nutrition-grid { grid-template-columns: 1fr; }
+  .reflection-grid { grid-template-columns: 1fr; }
+  .topbar-logo span + span { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top Bar -->
+  <nav class="topbar">
+    <div class="topbar-logo">
+      <span>🌸</span>
+      <span>人生重启系统 2.0</span>
+    </div>
+    <div class="topbar-nav">
+      <button class="nav-btn active" onclick="showView('overview')">概览</button>
+      <button class="nav-btn" onclick="showView('departments')">四大部门</button>
+      <button class="nav-btn" onclick="showView('daily')">每日计划</button>
+      <button class="nav-btn" onclick="showView('vision')">愿景与目标</button>
+      <button class="nav-btn mm-nav-btn" onclick="showView('mindmap')">🗺️ 全局视图</button>
+    </div>
+    <button class="topbar-save" id="saveBtn" onclick="saveData()">💾 保存</button>
+  </nav>
+
+  <div class="main">
+
+    <!-- ═══ VIEW: OVERVIEW ═══════════════════════════════ -->
+    <div class="view active" id="view-overview">
+      <div class="section-banner" style="background: linear-gradient(135deg, #4E7354 0%, #3B7A8F 100%);">
+        <div class="part-label">Life Restart System · 2025</div>
+        <h1>人生重启系统 · 架构总览</h1>
+        <p>你的身体是一座花园，这本手册是园丁的笔记。</p>
+      </div>
+
+      <!-- Vision excerpt -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;">
+        <div class="card" style="border-left:4px solid var(--green);">
+          <div style="font-family:'Noto Serif SC',serif;font-size:13px;color:var(--text-soft);margin-bottom:8px;">✨ 愿景宣言</div>
+          <div id="ov-abstract" style="font-size:14px;line-height:2;color:var(--text);font-family:'Noto Serif SC',serif;"></div>
+          <div style="margin-top:12px;">
+            <button class="btn-secondary" style="font-size:12px;padding:6px 14px;" onclick="showView('vision')">查看 / 编辑完整愿景 →</button>
+          </div>
+        </div>
+        <div class="card" style="border-left:4px solid var(--amber);">
+          <div style="font-family:'Noto Serif SC',serif;font-size:13px;color:var(--text-soft);margin-bottom:8px;">🌅 十年理想画面</div>
+          <div id="ov-concrete" style="font-size:14px;line-height:2;color:var(--text);font-family:'Noto Serif SC',serif;"></div>
+        </div>
+      </div>
+
+      <!-- Dept summary cards -->
+      <div class="section-title">🏗️ 四大部门架构</div>
+      <div class="grid-4" id="dept-overview-grid"></div>
+
+      <!-- System logic -->
+      <div class="mt-28">
+        <div class="section-title">⚙️ 系统运转逻辑</div>
+        <div class="card" style="background: linear-gradient(135deg,#EEF5EF,#E8F3F7);">
+          <div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:8px 0;">
+            <div style="text-align:center;padding:12px 16px;background:#fff;border-radius:10px;min-width:110px;box-shadow:0 2px 8px var(--shadow);">
+              <div style="font-size:18px;margin-bottom:4px;">🌿</div>
+              <div style="font-size:12px;font-weight:600;color:var(--green);">身体摄入</div>
+              <div style="font-size:11px;color:var(--text-soft);">输入什么</div>
+            </div>
+            <div style="font-size:20px;color:var(--text-soft);">→</div>
+            <div style="text-align:center;padding:12px 16px;background:#fff;border-radius:10px;min-width:110px;box-shadow:0 2px 8px var(--shadow);">
+              <div style="font-size:18px;margin-bottom:4px;">🏃</div>
+              <div style="font-size:12px;font-weight:600;color:var(--teal);">身体输出</div>
+              <div style="font-size:11px;color:var(--text-soft);">用能量做什么</div>
+            </div>
+            <div style="font-size:20px;color:var(--text-soft);">→</div>
+            <div style="text-align:center;padding:12px 16px;background:#fff;border-radius:10px;min-width:110px;box-shadow:0 2px 8px var(--shadow);">
+              <div style="font-size:18px;margin-bottom:4px;">🌸</div>
+              <div style="font-size:12px;font-weight:600;color:var(--rose);">情绪管理</div>
+              <div style="font-size:11px;color:var(--text-soft);">激素与心情</div>
+            </div>
+            <div style="font-size:20px;color:var(--text-soft);">→</div>
+            <div style="text-align:center;padding:12px 16px;background:#fff;border-radius:10px;min-width:110px;box-shadow:0 2px 8px var(--shadow);">
+              <div style="font-size:18px;margin-bottom:4px;">🌟</div>
+              <div style="font-size:12px;font-weight:600;color:var(--purple);">精神成长</div>
+              <div style="font-size:11px;color:var(--text-soft);">信念与人生观</div>
+            </div>
+            <div style="font-size:20px;color:var(--text-soft);">↩</div>
+          </div>
+          <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--text-mid);">改善任何一个部门，都会带动整个系统向上螺旋。小改变 + 时间复利 = 巨大转变。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ VIEW: DEPARTMENTS ═══════════════════════════ -->
+    <div class="view" id="view-departments">
+      <!-- Dept list view -->
+      <div id="dept-list-view">
+        <div class="section-banner" style="background: linear-gradient(135deg, #3B7A8F 0%, #6B5A9E 100%);">
+          <div class="part-label">Part 2 & 3 & 4</div>
+          <h1>四大部门 · 项目档案</h1>
+          <p>点击任意部门卡片，查看详细规划与项目。</p>
+        </div>
+        <div class="grid-2" id="dept-cards-grid"></div>
+      </div>
+
+      <!-- Dept detail view -->
+      <div id="dept-detail-view" style="display:none;">
+        <div class="breadcrumb">
+          <a onclick="showDeptList()">← 全部部门</a>
+          <span>/</span>
+          <span id="dept-detail-breadcrumb"></span>
+        </div>
+        <div id="dept-detail-content"></div>
+      </div>
+    </div>
+
+    <!-- ═══ VIEW: DAILY ════════════════════════════════ -->
+    <div class="view" id="view-daily">
+      <div class="section-banner" style="background: linear-gradient(135deg, #B87533 0%, #A85468 100%);">
+        <div class="part-label">Part 5</div>
+        <h1>每日行动指南</h1>
+        <p>从项目到当天 · 可勾选 · 每日使用</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;">
+        <div>
+          <div class="flex-between mb-16">
+            <div class="section-title" style="margin-bottom:0;">每日时间表</div>
+            <button class="btn-secondary" style="font-size:12.5px;padding:7px 16px;" onclick="resetChecks()">↺ 重置今日打勾</button>
+          </div>
+          <div id="schedule-blocks"></div>
+        </div>
+
+        <div>
+          <!-- Nutrition quick ref -->
+          <div class="card mb-16" id="nutrition-card">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div style="font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;">🥗 营养速查</div>
+              <button class="icon-btn" onclick="openNutritionModal()" title="编辑营养清单">✏️</button>
+            </div>
+            <div id="nutrition-display"></div>
+          </div>
+
+          <!-- Min version -->
+          <div class="card" style="border-left:4px solid var(--rose);">
+            <div style="font-family:'Noto Serif SC',serif;font-size:14px;font-weight:700;margin-bottom:12px;">🌸 最小执行版</div>
+            <div style="font-size:13px;color:var(--text-mid);margin-bottom:10px;">精力不足时，完成这5件事即100分：</div>
+            <div id="min-version-list"></div>
+          </div>
+
+          <!-- Reflection -->
+          <div class="card mt-12">
+            <div class="flex-between" style="margin-bottom:14px;">
+              <div style="font-family:'Noto Serif SC',serif;font-size:14px;font-weight:700;">📝 每日反思</div>
+              <span class="text-soft" id="today-date"></span>
+            </div>
+            <div id="reflection-rows"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ VIEW: MINDMAP ════════════════════════════════ -->
+    <div class="view" id="view-mindmap" style="margin:-36px -32px;height:calc(100vh - 62px);">
+      <div id="mm-wrap" style="position:relative;width:100%;height:100%;background:var(--cream);overflow:hidden;">
+        <svg id="mm-svg" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;cursor:grab;user-select:none;">
+          <defs>
+            <filter id="mm-shadow">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(45,37,32,0.13)"/>
+            </filter>
+            <filter id="mm-shadow-lg">
+              <feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="rgba(45,37,32,0.20)"/>
+            </filter>
+          </defs>
+          <g id="mm-canvas"></g>
+        </svg>
+        <div id="mm-controls" style="position:absolute;top:18px;right:18px;display:flex;flex-direction:column;gap:6px;z-index:10;">
+          <button class="mm-ctrl-btn" onclick="mmZoom(1.25)">＋</button>
+          <button class="mm-ctrl-btn" onclick="mmZoom(0.8)">－</button>
+          <button class="mm-ctrl-btn" onclick="mmReset()">⊙</button>
+          <div style="height:1px;background:var(--border);margin:2px 0;"></div>
+          <button class="mm-ctrl-btn" id="mm-collapse-btn" onclick="mmToggleCollapse()">◎ 项目</button>
+          <button class="mm-ctrl-btn" id="mm-daily-btn" onclick="mmToggleDaily()">☀ 任务</button>
+        </div>
+        <div id="mm-legend" style="position:absolute;bottom:18px;left:18px;background:rgba(251,248,243,0.92);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:12px;z-index:10;">
+          <div style="font-weight:700;margin-bottom:8px;color:var(--text-mid);font-size:11px;letter-spacing:.5px;text-transform:uppercase;">图例</div>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#4E7354;display:inline-block;flex-shrink:0;"></span><span style="color:var(--text-mid);">部门节点</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:#EEF5EF;border:2px solid #4E7354;display:inline-block;flex-shrink:0;"></span><span style="color:var(--text-mid);">进行中项目</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:#FBF2E6;border:2px dashed #B87533;display:inline-block;flex-shrink:0;"></span><span style="color:var(--text-mid);">计划中项目</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:#F5F5F5;border:2px solid #C0B8B0;display:inline-block;flex-shrink:0;"></span><span style="color:var(--text-mid);">已完成项目</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:#FDF3E7;border:1.5px solid #D4975A;display:inline-block;flex-shrink:0;"></span><span style="color:var(--text-mid);">每日任务</span></div>
+          </div>
+        </div>
+        <div id="mm-tooltip" style="position:absolute;display:none;background:var(--text);color:#fff;padding:8px 13px;border-radius:8px;font-size:12.5px;line-height:1.5;max-width:260px;pointer-events:none;z-index:20;box-shadow:0 4px 16px rgba(0,0,0,.2);"></div>
+        <div style="position:absolute;bottom:18px;right:18px;font-size:11.5px;color:var(--text-soft);background:rgba(251,248,243,0.85);padding:6px 12px;border-radius:20px;border:1px solid var(--border);">拖动平移 · 滚轮缩放 · 点击跳转</div>
+      </div>
+    </div>
+
+    <!-- ═══ VIEW: VISION ════════════════════════════════ -->
+    <div class="view" id="view-vision">
+      <div class="section-banner" style="background: linear-gradient(135deg, #4E7354 0%, #B87533 100%);">
+        <div class="part-label">Part 1 · 吸引力法则 · 正念</div>
+        <h1>愿景宣言 · 十年理想</h1>
+        <p>这是整个系统的灵魂起点。定期重读，让它成为内在罗盘。</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="flex-between mb-16">
+            <div class="sub-title" style="margin-bottom:0;">✨ 愿景宣言（抽象层）</div>
+            <button class="icon-btn" onclick="openVisionModal('abstract')" title="编辑">✏️</button>
+          </div>
+          <div style="font-size:12.5px;color:var(--text-soft);margin-bottom:12px;padding:10px 14px;background:var(--green-bg);border-radius:8px;line-height:1.8;">
+            💡 用精炼有力的语言说明这个项目存在的意义、核心目标和你所信仰的价值观。建议每周一次重读。
+          </div>
+          <div id="vision-abstract-display" class="vision-text"></div>
+        </div>
+
+        <div class="card">
+          <div class="flex-between mb-16">
+            <div class="sub-title" style="margin-bottom:0;">🌅 十年理想画面（具象层）</div>
+            <button class="icon-btn" onclick="openVisionModal('concrete')" title="编辑">✏️</button>
+          </div>
+          <div style="font-size:12.5px;color:var(--text-soft);margin-bottom:12px;padding:10px 14px;background:var(--amber-bg);border-radius:8px;line-height:1.8;">
+            💡 闭眼深呼吸，想象那一天。你在哪里？空气什么味道？越具体越好。这是写给未来自己的信。
+          </div>
+          <div id="vision-concrete-display" class="vision-text"></div>
+        </div>
+      </div>
+
+      <!-- How to use -->
+      <div class="card mt-20" style="background:linear-gradient(135deg,var(--green-bg),var(--teal-bg));">
+        <div style="font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;margin-bottom:14px;">📖 Part 1 使用指南</div>
+        <div class="grid-2">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:6px;">吸引力法则</div>
+            <div style="font-size:13px;color:var(--text-mid);line-height:1.8;">清晰描述并感受自己想要的状态，宇宙会开始将资源和机遇对准你。定期（建议每周一次）重读这一部分，让它成为行动的内在罗盘。</div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--teal);margin-bottom:6px;">正念核心</div>
+            <div style="font-size:13px;color:var(--text-mid);line-height:1.8;">这不是用执行压垮自己的工具，而是帮助你带着觉察去生活。允许自己有起伏，允许项目暂停，允许修改计划——这本手册与你共同成长。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ═══ MODAL: Edit Vision ═══ -->
+<div class="modal-overlay" id="modal-vision">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-vision')">✕</button>
+    <div class="modal-title" id="modal-vision-title">编辑愿景宣言</div>
+    <div class="form-group">
+      <label class="form-label">内容</label>
+      <textarea class="form-textarea" id="vision-edit-input" style="min-height:180px;" placeholder="在这里写下你的心声..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-vision')">取消</button>
+      <button class="btn-primary" onclick="saveVision()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Edit Project ═══ -->
+<div class="modal-overlay" id="modal-project">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-project')">✕</button>
+    <div class="modal-title" id="modal-project-title">添加项目</div>
+    <input type="hidden" id="project-edit-dept">
+    <input type="hidden" id="project-edit-id">
+    <div class="form-group">
+      <label class="form-label">项目名称</label>
+      <input class="form-input" id="project-edit-name" placeholder="例：科学康复营养食谱计划">
+    </div>
+    <div class="form-group">
+      <label class="form-label">项目状态</label>
+      <select class="form-select" id="project-edit-status">
+        <option value="active">🔵 进行中</option>
+        <option value="planned">🌱 计划中</option>
+        <option value="done">✅ 已完成</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">项目描述（功能 · 目标 · 收获）</label>
+      <textarea class="form-textarea" id="project-edit-desc" placeholder="简述这个项目做什么，有什么作用，或者你的收获..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-project')">取消</button>
+      <button class="btn-primary" onclick="saveProject()">保存项目</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Edit Dept Goal ═══ -->
+<div class="modal-overlay" id="modal-goal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-goal')">✕</button>
+    <div class="modal-title">编辑部门目标</div>
+    <input type="hidden" id="goal-edit-dept">
+    <div class="form-group">
+      <label class="form-label">🟢 短期目标（1-3个月）</label>
+      <textarea class="form-textarea" id="goal-short" style="min-height:80px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">🔵 中期目标（3-12个月）</label>
+      <textarea class="form-textarea" id="goal-mid" style="min-height:80px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">⭐ 长期目标（1年以上）</label>
+      <textarea class="form-textarea" id="goal-long" style="min-height:80px;"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-goal')">取消</button>
+      <button class="btn-primary" onclick="saveGoal()">保存目标</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Edit Schedule Item ═══ -->
+<div class="modal-overlay" id="modal-schedule">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-schedule')">✕</button>
+    <div class="modal-title" id="modal-schedule-title">添加事项</div>
+    <input type="hidden" id="sched-edit-period">
+    <input type="hidden" id="sched-edit-id">
+    <div class="form-group">
+      <label class="form-label">时间</label>
+      <input class="form-input" id="sched-edit-time" placeholder="例：07:30 或 起床后">
+    </div>
+    <div class="form-group">
+      <label class="form-label">行动项目</label>
+      <input class="form-input" id="sched-edit-task" placeholder="例：晨间散步 30-40分钟">
+    </div>
+    <div class="form-group">
+      <label class="form-label">来源项目 / 说明</label>
+      <input class="form-input" id="sched-edit-source" placeholder="例：每日晨间散步计划">
+    </div>
+    <div class="form-group">
+      <label class="form-label">关联项目（链接每日实践模块）</label>
+      <select class="form-select" id="sched-edit-project">
+        <option value="">— 不关联项目 —</option>
+      </select>
+      <div style="font-size:11.5px;color:var(--text-soft);margin-top:5px;">选择关联后，每日计划中此事项旁边会显示「查看模块」按钮。</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-schedule')">取消</button>
+      <button class="btn-primary" onclick="saveScheduleItem()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Nutrition ═══ -->
+<div class="modal-overlay" id="modal-nutrition">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-nutrition')">✕</button>
+    <div class="modal-title">编辑营养速查清单</div>
+    <div class="form-group">
+      <label class="form-label">✅ 每天积极摄入（每行一条）</label>
+      <textarea class="form-textarea" id="nutrition-good-input" style="min-height:140px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">⚠️ 需要减少或避免（每行一条）</label>
+      <textarea class="form-textarea" id="nutrition-avoid-input" style="min-height:140px;"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-nutrition')">取消</button>
+      <button class="btn-primary" onclick="saveNutrition()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: Edit Dept Info ═══ -->
+<div class="modal-overlay" id="modal-dept-info">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-dept-info')">✕</button>
+    <div class="modal-title">编辑部门信息</div>
+    <input type="hidden" id="dept-info-id">
+    <div class="form-group">
+      <label class="form-label">存在意义</label>
+      <textarea class="form-textarea" id="dept-info-meaning"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">核心职责</label>
+      <textarea class="form-textarea" id="dept-info-duties"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-dept-info')">取消</button>
+      <button class="btn-primary" onclick="saveDeptInfo()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══ MODAL: Edit Daily Module ═══ -->
+<div class="modal-overlay" id="modal-dailymod">
+  <div class="modal" style="max-width:640px;">
+    <button class="modal-close" onclick="closeModal('modal-dailymod')">✕</button>
+    <div class="modal-title" id="modal-dailymod-title">编辑每日实践模块</div>
+    <input type="hidden" id="dailymod-proj-id">
+    <div style="font-size:12.5px;color:var(--text-soft);margin-bottom:18px;padding:10px 14px;background:var(--teal-bg);border-radius:8px;line-height:1.8;">
+      💡 每日模块是这个项目落实到每天的具体操作指南。它会显示在「部门详情」和「每日计划」中，作为可随时查阅的参考文档。
+    </div>
+    <div class="form-group">
+      <label class="form-label">模块标题</label>
+      <input class="form-input" id="dailymod-title" placeholder="例：🌬 478呼吸法 · 每日放松练习">
+    </div>
+    <div class="form-group">
+      <label class="form-label">执行频率</label>
+      <input class="form-input" id="dailymod-freq" placeholder="例：每天2次：起床后 & 睡前 · 每次3-5分钟">
+    </div>
+    <div class="form-group">
+      <label class="form-label">实践步骤（每步一行，格式：emoji 标签名 | 内容）</label>
+      <div style="font-size:11.5px;color:var(--text-soft);margin-bottom:6px;">每行格式：<code style="background:var(--paper);padding:1px 6px;border-radius:4px;">🪑 准备姿势 | 坐直或躺下，闭上眼睛…</code></div>
+      <textarea class="form-textarea" id="dailymod-steps" style="min-height:200px;font-size:13px;line-height:1.8;" placeholder="每行一个步骤，用 | 分隔标签和内容&#10;例：&#10;1️⃣ 呼气清空 | 先用嘴彻底呼出肺里的空气…&#10;2️⃣ 吸气4秒 | 闭嘴，用鼻子平静地吸气…"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">温馨提示 / 备注</label>
+      <textarea class="form-textarea" id="dailymod-notes" style="min-height:70px;" placeholder="可以写一些鼓励的话，或注意事项…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-dailymod')">取消</button>
+      <button class="btn-primary" onclick="saveDailyModule()">保存模块</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANEL: Daily Module Slide-in ═══ -->
+<div id="module-panel-overlay" onclick="closeModulePanel()" style="position:fixed;inset:0;z-index:300;background:rgba(45,37,32,0.3);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .25s;"></div>
+<div id="module-panel" style="position:fixed;right:0;top:0;bottom:0;z-index:301;width:420px;max-width:94vw;background:#fff;box-shadow:-6px 0 40px rgba(45,37,32,0.18);transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;display:flex;flex-direction:column;">
+  <div id="module-panel-header" style="padding:22px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+      <div>
+        <div id="module-panel-dept" style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-soft);margin-bottom:4px;"></div>
+        <div id="module-panel-proj" style="font-size:15px;font-weight:700;color:var(--text);font-family:'Noto Serif SC',serif;margin-bottom:4px;"></div>
+        <div id="module-panel-title" style="font-size:22px;font-weight:700;font-family:'Noto Serif SC',serif;color:var(--text);"></div>
+      </div>
+      <button onclick="closeModulePanel()" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:16px;color:var(--text-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
+    </div>
+    <div id="module-panel-freq" style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12.5px;font-weight:500;"></div>
+  </div>
+  <div id="module-panel-body" style="padding:20px 24px;flex:1;"></div>
+  <div id="module-panel-footer" style="padding:16px 24px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:10px;">
+    <button id="module-panel-edit-btn" onclick="openDailyModuleModal(currentModuleProjectId)" class="btn-secondary" style="flex:1;font-size:13px;">✏️ 编辑模块</button>
+    <button onclick="closeModulePanel()" class="btn-primary" style="flex:1;font-size:13px;">完成</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════
+
+const DEFAULT_DATA = {
+  vision: {
+    abstract: `这个系统存在的意义，是帮助我以温柔而科学的方式，重新认识并爱护自己的身体与内心。
+
+我相信身体有修复自己的智慧，我相信平静的心灵会带来健康的激素，
+我相信每一个微小的好习惯，都在悄悄改变我的细胞与命运。
+
+这个系统不是对抗疾病的战场，而是滋养生命的花园。
+
+我的核心目标是：每一天都比昨天多一点点活力，多一点点平静，多一点点喜悦。
+我是自己身体最好的朋友，也是自己人生最用心的园丁。`,
+    concrete: `那是一个阳光明媚的清晨，我在宽敞明亮的卧室里自然醒来，没有闹钟的焦虑。
+
+我走到阳台，捧着一杯温热的姜黄牛奶，看着院子里的花开得正好。
+我的皮肤有光泽，步伐从容，心里有一种踏实的喜悦。
+
+我的身体指标一切正常，每半年的复查都是好消息。
+我对医生说："我感觉比生病前还要好。"
+
+我深深地爱着自己，也被深深地爱着。🌸`
+  },
+  departments: [
+    {
+      id: 'dept1', emoji: '🌿', name: '身体营养摄入部门',
+      color: '--green', colorHex: '#4E7354', bgHex: '#EEF5EF',
+      meaning: '你给身体输入什么，它就用什么原料来修复和运转。科学、温和的营养摄入，是一切康复与活力的基础燃料。',
+      duties: '管理一切进入身体的物质——食物营养、水分摄入、光照、维生素与营养补充剂、饮食习惯，以及身体所处的物理环境质量。',
+      goals: {
+        short: '建立每日营养饮食记录习惯，依据康复营养学制定并稳定执行科学食谱，减少高风险食物摄入。',
+        mid: '形成直觉性的健康饮食习惯，不再需要刻意查阅，营养指标（如维生素D、铁等）恢复到健康范围。',
+        long: '拥有一套完全适合自己体质的个性化营养体系，身体整体能量感和免疫力显著提升，饮食成为一种享受而非负担。'
+      },
+      projects: [
+        { id: 'p1', name: '纯素食主义饮食实验', status: 'done', desc: '尝试过一段时间完全植物性饮食。优点：蔬果摄入增加，身体感觉清爽；挑战：蛋白质和B12摄入不足，后期体力下降。收获：了解了全植物饮食的边界，学会更注意蛋白质来源。' },
+        { id: 'p2', name: '生酮饮食探索', status: 'done', desc: '短期尝试高脂低碳饮食。初期体重有变化，但身体较疲惫，不适合长期坚持。了解了身体对极端饮食结构的反应，建立了对身体信号的觉察。' },
+        { id: 'p3', name: '科学康复营养食谱计划', status: 'active', desc: '依据乳腺癌康复营养学研究，制定个性化每日饮食指南。涵盖推荐食物（十字花科蔬菜、豆制品、富含Omega-3食物）、需减少的高风险食物（酒精、加工肉类、精制糖）、每日营养素参考量。每周调整一次食谱，持续追踪身体反应。',
+          dailyModule: {
+            title: '🥗 每日饮食执行指南',
+            frequency: '每餐参照 · 每日记录',
+            steps: [
+              { icon: '🌅', label: '早餐', text: '杂粮粥 / 燕麦 + 豆浆 + 一个煮蛋 + 小份蔬菜（西兰花、菠菜）。避免白粥配腐乳。' },
+              { icon: '☀️', label: '上午加餐', text: '一小把坚果（核桃5颗 / 亚麻籽1茶匙）+ 一杯温水。' },
+              { icon: '🌸', label: '午餐', text: '一份深色蔬菜 + 豆腐或鱼肉（三文鱼/沙丁鱼优先）+ 适量主食（糙米/杂粮饭）。' },
+              { icon: '🌙', label: '晚餐', text: '清淡为主。蒸煮代替煎炸，少盐少油。半碗主食 + 两种蔬菜 + 少量优质蛋白。' },
+              { icon: '📝', label: '每日记录', text: '晚餐后花2分钟记录今日饮食亮点和需要改进的地方。' },
+            ],
+            notes: '每周可以给自己安排一顿"心情餐"——吃一道自己喜欢的菜，享受食物带来的快乐，不要总是负担感。营养是滋养，不是惩罚。🌿'
+          }
+        },
+        { id: 'p4', name: '阳光与水分日常打卡', status: 'active', desc: '每日追踪日照时间（目标20分钟户外）和饮水量（目标1500-2000ml）。充足阳光有助于维生素D合成，支持免疫系统功能。每日在习惯追踪表中记录，形成视觉化反馈。',
+          dailyModule: {
+            title: '☀️ 阳光与水分日常指南',
+            frequency: '全天执行 · 早晚各一次打卡',
+            steps: [
+              { icon: '💧', label: '起床即喝水', text: '起床后第一件事：喝一杯200ml温水（不要冰水）。激活身体，帮助肠胃蠕动。' },
+              { icon: '🌤', label: '晨间阳光', text: '早饭后散步时确保户外日照≥20分钟。不要戴墨镜（允许眼睛接受自然光），但涂防晒保护皮肤。' },
+              { icon: '⏰', label: '全天补水节奏', text: '每小时约150ml：起床/09:00/11:00/13:00/15:00/17:00/19:00/21:00，共约1600ml。' },
+              { icon: '🌅', label: '下午阳台光照', text: '17:00前后在阳台或窗边晒10-15分钟，不必外出。帮助调节昼夜节律，改善夜间睡眠质量。' },
+              { icon: '✅', label: '睡前打卡', text: '睡前确认：今日喝水≥1500ml ✓  户外日照≥20分钟 ✓  感受身体有无变化。' },
+            ],
+            notes: '阴天或雨天无法保证户外日照时，可以坐在明亮的窗边30分钟代替。不要为没做到而内疚，记录即是进步。'
+          }
+        },
+        { id: 'p5', name: '中医食养调理探索', status: 'planned', desc: '计划结合中医体质辨识（如气虚、阴虚），咨询中医师后制定个性化食养方案，将西医营养学与中医食疗相结合，进一步优化身体调理方式。' },
+        { id: 'p6', name: '肠道菌群健康优化计划', status: 'planned', desc: '研究发酵食品（泡菜、酸奶、味噌）和益生元食物对肠道健康的影响。计划逐步引入发酵食品，三个月后评估消化状态和整体能量感变化。' }
+      ]
+    },
+    {
+      id: 'dept2', emoji: '🏃', name: '身体运动输出部门',
+      color: '--teal', colorHex: '#3B7A8F', bgHex: '#E8F3F7',
+      meaning: '适度的运动能改善淋巴循环、平衡激素、提升免疫力，并直接影响心情与睡眠质量。运动是给身体最好的礼物之一。',
+      duties: '管理你身体的日常使用方式——运动类型与频率、作息时间表、每日活动量、户外接触自然的时间，以及避免过度久坐或过度疲劳。',
+      goals: {
+        short: '养成每天至少30分钟温和活动的习惯（如散步、拉伸），建立规律的作息节奏，逐步恢复活动能力。',
+        mid: '引入适合身体状况的康复运动（如八段锦、游泳、瑜伽），体能明显提升，不再感到长期疲惫。',
+        long: '维持长期稳定的运动习惯，成为生活方式的一部分；体能状态超越生病前水平，运动带来快乐而非负担。'
+      },
+      projects: [
+        { id: 'p7', name: '居家拉伸恢复计划（术后初期）', status: 'done', desc: '术后早期进行的温和拉伸运动，主要针对肩部和上肢活动度恢复。坚持了约6周，肩关节活动范围明显改善，也帮助建立了每天有意识活动身体的习惯。' },
+        { id: 'p8', name: '每日晨间散步计划', status: 'active', desc: '每天早饭后进行30-40分钟户外慢速散步，以公园或社区绿道为主。目标是稳定血糖、促进淋巴循环、获得自然光照、改善心情。已坚持每周5次，计划长期维持。',
+          dailyModule: {
+            title: '🚶 晨间散步实践指南',
+            frequency: '每天早饭后 · 30-40分钟',
+            steps: [
+              { icon: '🕐', label: '出发时机', text: '早饭后20-30分钟出发，血糖稍稳定后再散步，避免空腹运动引起低血糖。' },
+              { icon: '👟', label: '速度与姿势', text: '慢速步行——感觉"可以舒适讲话"的节奏。抬头挺胸，手臂自然摆动，脚跟先落地。' },
+              { icon: '🌿', label: '路线建议', text: '选有树木和绿植的路线（公园、社区绿道）。接触自然对情绪的积极作用比硬地面运动更明显。' },
+              { icon: '🌬', label: '途中练习', text: '走路时可以轻柔地进行腹式呼吸：吸气4步·呼气4步。感受脚踩地面的踏实感。' },
+              { icon: '📍', label: '时长目标', text: '第1-2周：20分钟即可。第3-4周：25-30分钟。之后：稳定在30-40分钟。身体不适时缩短，不强求。' },
+              { icon: '✅', label: '回来后', text: '喝一杯水，感受身体的变化：有没有比出发前更轻盈？记录下来。' },
+            ],
+            notes: '雨天或身体不适时，改为在室内慢走15分钟 + 窗边接受自然光，同样有效。散步不是任务，是给自己的礼物。'
+          }
+        },
+        { id: 'p9', name: '八段锦 / 五禽戏练习计划', status: 'planned', desc: '传统中医康复功法，动作温和、全身性，特别适合康复期人群。计划学习基础套路，从每天10分钟开始，逐步增加到30分钟，配合呼吸练习。' },
+        { id: 'p10', name: '水中运动（游泳 / 水中步行）', status: 'planned', desc: '水的浮力减轻关节压力，适合术后体能恢复阶段。计划在身体状态允许后尝试每周2次水中运动，同时享受水的放松感与乐趣。' }
+      ]
+    },
+    {
+      id: 'dept3', emoji: '🌸', name: '情绪与心情管理部门',
+      color: '--purple', colorHex: '#6B5A9E', bgHex: '#F0ECF8',
+      meaning: '情绪不是软弱，是生理信号。长期焦虑会导致皮质醇升高，影响免疫系统功能，并干扰睡眠与修复。照顾情绪，就是照顾身体。',
+      duties: '管理日常情绪状态、压力水平、睡眠质量、激素平衡相关的生活习惯（如日晒、社交、放松），以及建立应对焦虑的工具包。',
+      goals: {
+        short: '建立每日情绪觉察习惯（如晚间简短记录），掌握2-3个快速舒缓焦虑的工具（呼吸法、散步、音乐），睡眠质量有所改善。',
+        mid: '焦虑感明显降低，对治疗建立平静接纳的心态；拥有可靠的情绪支持圈（家人、朋友、心理咨询）。',
+        long: '发展出稳定的内在平静感，压力来临时有成熟的应对智慧；生活中的喜悦感、满足感大于恐惧与担忧。'
+      },
+      projects: [
+        { id: 'p11', name: '心理咨询初探（短期）', status: 'done', desc: '接受了几次心理咨询，学习到了认知重构的基本方法，能够识别焦虑思维的模式。虽然时间较短，但建立了对心理健康工具的了解和信任感。' },
+        { id: 'p12', name: '每日情绪觉察日记', status: 'active', desc: '每晚睡前用5分钟记录当天的情绪变化——什么让我感到担忧，什么让我感到平静或开心。不做评判，只做觉察。帮助识别情绪模式，减少情绪在无意识中积累的压力。',
+          dailyModule: {
+            title: '📓 情绪觉察日记 · 每晚5分钟',
+            frequency: '每晚睡前 · 约5分钟',
+            steps: [
+              { icon: '🕯', label: '准备', text: '关掉手机屏幕，找到一个安静的角落。拿出笔记本或打开备忘录。深呼吸三次，让身体慢下来。' },
+              { icon: '🌡', label: '身体扫描', text: '从头到脚扫描一遍：哪里有紧绷感？哪里感到沉重或轻盈？不评判，只是注意到。' },
+              { icon: '💭', label: '今日情绪', text: '写下今天印象最深的一个情绪时刻。是什么触发了它？你当时做了什么反应？' },
+              { icon: '⭐', label: '今日亮点', text: '今天有没有哪一刻感到平静、开心或满足？哪怕很微小——一口好吃的饭、一缕阳光、一句暖心的话。' },
+              { icon: '🌸', label: '明日一句话', text: '给明天的自己写一句话：可以是鼓励，可以是提醒，可以只是"明天我会好好照顾自己"。' },
+            ],
+            notes: '写完后不要回头评判自己写的内容。这个日记是给自己看的，没有对错，只有真实。即使只写一句话也算完成。'
+          }
+        },
+        { id: 'p13', name: '呼吸放松练习（478呼吸法）', status: 'active', desc: '每天1-2次练习4-7-8呼吸法（吸气4秒·屏息7秒·呼气8秒），有效激活副交感神经，降低急性焦虑感。特别在治疗相关焦虑来袭时使用，已感受到明显的镇定效果。',
+          dailyModule: {
+            title: '🌬 478呼吸法 · 每日放松练习',
+            frequency: '每天2次：起床后 & 睡前 · 每次3-5分钟',
+            steps: [
+              { icon: '🪑', label: '姿势准备', text: '坐直或躺下均可。闭上眼睛，双手放在膝盖或腹部，感受身体与椅子/床的接触。' },
+              { icon: '1️⃣', label: '第一步：呼气清空', text: '先用嘴彻底呼出肺里的空气，发出"呼——"的声音，完全清空。' },
+              { icon: '2️⃣', label: '第二步：吸气4秒', text: '闭嘴，用鼻子平静地吸气，默数1-2-3-4。感受腹部（而非胸部）轻轻鼓起。' },
+              { icon: '3️⃣', label: '第三步：屏息7秒', text: '屏住呼吸，默数1-2-3-4-5-6-7。这个步骤会让神经系统从"战斗"状态切换。' },
+              { icon: '4️⃣', label: '第四步：呼气8秒', text: '用嘴缓慢呼气，发"呼"声，默数1-2-3-4-5-6-7-8。让所有紧绷随呼吸离开身体。' },
+              { icon: '🔄', label: '循环次数', text: '早晨：3个循环  ·  睡前：5个循环  ·  焦虑来袭时：随时做2-3个循环即可感受到效果。' },
+            ],
+            notes: '如果屏息7秒感觉太长，可以从4-4-6开始。不用追求完美节奏，舒适最重要。练习一周后节奏会变得自然。'
+          }
+        },
+        { id: 'p14', name: '正念冥想入门计划', status: 'planned', desc: '计划从引导式冥想APP（如Headspace、Calm中文版）入手，每天10分钟，聚焦于身体扫描和呼吸观察。目标是在三个月内建立稳定的冥想习惯，提升对当下时刻的专注力与平静感。' },
+        { id: 'p15', name: '社交连接滋养计划', status: 'planned', desc: '计划每周安排1-2次有意义的社交活动——与家人共餐、与老友视频、加入一个兴趣小组。真实的人际连接是情绪健康最有效的滋养来源之一。' }
+      ]
+    },
+    {
+      id: 'dept4', emoji: '🌟', name: '精神核心与自我成长部门',
+      color: '--amber', colorHex: '#B87533', bgHex: '#FBF2E6',
+      meaning: '这个部门是系统中最抽象也最深远的部分。它代表你的信念、你的人生观、你对自己生命意义的理解。它是你一切行动的终极动力来源。',
+      duties: '长期记录与迭代你对生命的理解——你的核心信念、内在价值观、人生的喜悦之源；定期反思和更新，让这些洞见流回其他三个部门，成为养分。',
+      goals: {
+        short: '写下3-5条你现在最核心的人生信念或感悟，开始探索让自己感到有意义的事（爱好、关系、贡献）。',
+        mid: '发展出属于自己的正念或冥想实践，定期（每月一次）回顾自己的成长与变化，建立与生命更深的联结。',
+        long: '拥有清晰的人生价值排序，知道什么对你真正重要；活得越来越有意识，越来越从容，成为家人心中平静有力的存在。'
+      },
+      projects: [
+        { id: 'p16', name: '生命回顾与感恩书写（初稿）', status: 'done', desc: '写下了自己人生中最重要的十件事与最感恩的十个人。这个过程让我意识到生命中美好事物的丰盛，建立了感恩视角的基础。' },
+        { id: 'p17', name: '人生重启系统 · 本手册', status: 'active', desc: '这本手册本身就是一个长期运行的精神项目。它记录我的成长轨迹，帮我在每一个人生阶段重新认识自己。每季度更新一次，不断迭代优化，是我给自己最用心的礼物。',
+          dailyModule: {
+            title: '🌟 精神滋养 · 每日微实践',
+            frequency: '每天随时 · 每周一次深度更新',
+            steps: [
+              { icon: '☀️', label: '晨间一句话（每天）', text: '早起后翻到愿景宣言，默读第一段。只需30秒。让这天从一个有意义的信念开始。' },
+              { icon: '💭', label: '觉察练习（每天）', text: '问自己：今天有没有哪一刻感到"这就是活着的意义"？可以很微小——一杯好茶、阳光落在手上的感觉。' },
+              { icon: '📝', label: '感恩记录（每天）', text: '睡前写下今天一件感到感恩的事。不要重复，试着找不同的角度。一年后这个清单会成为你最珍贵的财富。' },
+              { icon: '🗺', label: '周回顾（每周一次）', text: '每周日花15分钟：回顾这一周哪些项目做得好？哪个部门需要关注？有没有新的想法要加入系统？' },
+              { icon: '🌱', label: '季度更新（每季度）', text: '更新这本手册：回顾目标进展，调整项目状态，补充新的项目想法，重写十年画面（如果有新的感悟）。' },
+            ],
+            notes: '精神成长没有固定形式。有时候一首歌、一本书的某句话、一次散步中的顿悟，都是这个部门的收获。随时记录，随时更新。'
+          }
+        },
+        { id: 'p18', name: '精读一本生命智慧之书', status: 'planned', desc: '计划每季度精读一本与生命、康复、内心平静相关的书籍（如《当下的力量》《活出生命的意义》《身体从未忘记》），读后写下300字感悟，让书中的智慧融入自己的生命系统。' },
+        { id: 'p19', name: '兴趣复兴计划', status: 'planned', desc: '重新拾起一件曾经热爱但因为忙碌而放下的事——绘画、手工、音乐、园艺……目的不是成为专家，而是让灵魂有一个自由呼吸的空间，找回"为自己而活"的喜悦感。' }
+      ]
+    }
+  ],
+  schedule: [
+    {
+      id: 's1', period: '🌅 早晨模块', time_range: '起床 ~ 09:00',
+      color: '#4E7354', bg: '#EEF5EF',
+      items: [
+        { id: 'si1', time: '起床后', task: '喝一杯温水（200ml）', source: '阳光与水分打卡', projectId: 'p4', checked: false },
+        { id: 'si2', time: '起床后', task: '拉开窗帘，迎接阳光', source: '情绪管理', checked: false },
+        { id: 'si3', time: '起床后', task: '478呼吸法 × 3个循环', source: '呼吸放松练习', projectId: 'p13', checked: false },
+        { id: 'si4', time: '07:30', task: '营养早餐（参照食谱）', source: '科学康复营养食谱', projectId: 'p3', checked: false },
+        { id: 'si5', time: '08:00', task: '晨间散步 30-40分钟（户外日照满20分钟）', source: '每日晨间散步计划', projectId: 'p8', checked: false }
+      ]
+    },
+    {
+      id: 's2', period: '🌤 上午模块', time_range: '09:00 ~ 12:00',
+      color: '#3B7A8F', bg: '#E8F3F7',
+      items: [
+        { id: 'si6', time: '09:00', task: '服用营养补充剂（维生素D等）', source: '科学康复营养食谱', projectId: 'p3', checked: false },
+        { id: 'si7', time: '10:00', task: '补充水分（目标每小时150ml）', source: '阳光与水分打卡', projectId: 'p4', checked: false },
+        { id: 'si8', time: '11:00', task: '轻度拉伸或八段锦练习（10分钟）', source: '身体运动输出', checked: false },
+        { id: 'si9', time: '11:30', task: '准备午餐食材（参照食谱）', source: '科学康复营养食谱', projectId: 'p3', checked: false }
+      ]
+    },
+    {
+      id: 's3', period: '🌸 下午模块', time_range: '12:00 ~ 18:00',
+      color: '#6B5A9E', bg: '#F0ECF8',
+      items: [
+        { id: 'si10', time: '12:00', task: '营养午餐（参照食谱）', source: '科学康复营养食谱', projectId: 'p3', checked: false },
+        { id: 'si11', time: '饭后', task: '餐后10分钟慢走（室内/室外）', source: '每日晨间散步 · 血糖管理', projectId: 'p8', checked: false },
+        { id: 'si12', time: '13:00', task: '午休 20-30分钟（不强求）', source: '情绪管理 · 睡眠修复', checked: false },
+        { id: 'si13', time: '15:00', task: '自由时间 · 阅读 / 手工 / 园艺', source: '精神成长 · 兴趣复兴计划', projectId: 'p17', checked: false },
+        { id: 'si14', time: '17:00', task: '户外散步或阳台接触自然光', source: '阳光与水分打卡 · 情绪管理', projectId: 'p4', checked: false }
+      ]
+    },
+    {
+      id: 's4', period: '🌙 晚间模块', time_range: '18:00 ~ 睡前',
+      color: '#2D2520', bg: '#F5F0E8',
+      items: [
+        { id: 'si15', time: '18:00', task: '营养晚餐（参照食谱 · 宜清淡）', source: '科学康复营养食谱', projectId: 'p3', checked: false },
+        { id: 'si16', time: '餐后', task: '记录今日饮食与水分摄入', source: '阳光与水分打卡', projectId: 'p4', checked: false },
+        { id: 'si17', time: '20:00', task: '减少屏幕使用，进入放松模式', source: '情绪管理 · 睡眠质量', checked: false },
+        { id: 'si18', time: '21:00', task: '478呼吸法 × 5个循环', source: '呼吸放松练习', projectId: 'p13', checked: false },
+        { id: 'si19', time: '21:15', task: '情绪觉察日记（5分钟）', source: '每日情绪觉察日记', projectId: 'p12', checked: false },
+        { id: 'si20', time: '22:00', task: '准时上床（目标7-8小时睡眠）', source: '情绪管理 · 激素修复', checked: false }
+      ]
+    }
+  ],
+  nutrition: {
+    good: ['🥦 十字花科蔬菜（西兰花、白菜、芥蓝）','🫘 豆制品（豆腐、豆浆、毛豆）','🐟 富含Omega-3的鱼类（三文鱼、沙丁鱼）','🫐 深色浆果（蓝莓、草莓、桑葚）','🌰 坚果一小把（核桃、亚麻籽）','🥕 五色蔬菜、菌菇类','💧 温水 1500-2000ml / 天'],
+    avoid: ['🚫 酒精及含酒精饮料','🚫 加工肉类（培根、香肠、腊肉）','🚫 精制糖和高糖甜点','🚫 高温油炸食品','🚫 含防腐剂的超加工食品','🚫 过量红肉（每周不超过2次）','⚠️ 豆腐/大豆：适量（咨询医生）']
+  },
+  minVersion: [
+    { icon: '💧', text: '喝足够的水（至少1000ml）', color: '#3B7A8F' },
+    { icon: '🥦', text: '吃三顿营养的正餐（哪怕很简单）', color: '#4E7354' },
+    { icon: '☀️', text: '走出门或站在阳台晒10分钟太阳', color: '#B87533' },
+    { icon: '🌬', text: '做一次478呼吸（5个循环，约3分钟）', color: '#6B5A9E' },
+    { icon: '📝', text: '写下今天一件让你感到温暖的小事', color: '#A85468' }
+  ],
+  reflectionPrompts: [
+    { label: '🌡️ 今天的身体感受', placeholder: '能量感 · 疼痛 · 睡眠质量……', color: '#4E7354' },
+    { label: '💭 今天的心情', placeholder: '焦虑 · 平静 · 开心 · 担忧……', color: '#6B5A9E' },
+    { label: '⭐ 今天做得最好的一件事', placeholder: '哪怕只有一件小事……', color: '#B87533' },
+    { label: '🌸 明天想对自己说', placeholder: '鼓励 · 期待 · 小目标……', color: '#A85468' }
+  ]
+};
+
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+
+let state = JSON.parse(localStorage.getItem('lifeRestart_v2') || 'null') || deepClone(DEFAULT_DATA);
+let currentVisionField = 'abstract';
+let currentProjectDept = null;
+let currentProjectId = null;
+let currentGoalDept = null;
+let currentSchedPeriod = null;
+let currentSchedId = null;
+let currentDeptDetailId = null;
+
+function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+function saveData() {
+  localStorage.setItem('lifeRestart_v2', JSON.stringify(state));
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = '✅ 已保存';
+  btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = '💾 保存'; btn.classList.remove('saved'); }, 2000);
+  showToast('数据已保存到本地浏览器');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function uid() { return 'id_' + Math.random().toString(36).substr(2,8); }
+
+// ══════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const map = { overview: 0, departments: 1, daily: 2, vision: 3, mindmap: 4 };
+  document.querySelectorAll('.nav-btn')[map[name]].classList.add('active');
+  if (name === 'overview') renderOverview();
+  if (name === 'departments') renderDeptList();
+  if (name === 'daily') renderDaily();
+  if (name === 'vision') renderVision();
+  if (name === 'mindmap') { setTimeout(renderMindmap, 40); }
+}
+
+// ══════════════════════════════════════════════════════════
+// STATUS HELPERS
+// ══════════════════════════════════════════════════════════
+
+function statusBadge(status) {
+  const cfg = {
+    done:    { label: '✅ 已完成', bg: '#F5F5F5', color: '#777' },
+    active:  { label: '🔵 进行中', bg: '#EEF5EF', color: '#4E7354' },
+    planned: { label: '🌱 计划中', bg: '#FBF2E6', color: '#B87533' }
+  };
+  const c = cfg[status] || cfg.planned;
+  return `<span class="status-badge" style="background:${c.bg};color:${c.color};">${c.label}</span>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// OVERVIEW
+// ══════════════════════════════════════════════════════════
+
+function renderOverview() {
+  // vision excerpts
+  const ab = state.vision.abstract;
+  document.getElementById('ov-abstract').textContent = ab.split('\n').filter(Boolean)[0] + '…';
+  const co = state.vision.concrete;
+  document.getElementById('ov-concrete').textContent = co.split('\n').filter(Boolean)[0] + '…';
+
+  const grid = document.getElementById('dept-overview-grid');
+  grid.innerHTML = '';
+  state.departments.forEach(dept => {
+    const active = dept.projects.filter(p => p.status === 'active').length;
+    const total  = dept.projects.length;
+    const done   = dept.projects.filter(p => p.status === 'done').length;
+    const planned= dept.projects.filter(p => p.status === 'planned').length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+
+    const card = document.createElement('div');
+    card.className = 'dept-card';
+    card.onclick = () => { showView('departments'); showDeptDetail(dept.id); };
+    card.innerHTML = `
+      <div class="dept-card-header" style="background:${dept.bgHex}08;">
+        <div class="dept-emoji">${dept.emoji}</div>
+        <div>
+          <div class="dept-card-title" style="color:${dept.colorHex};">${dept.name}</div>
+          <div class="dept-card-sub">${dept.meaning.substring(0,42)}…</div>
+        </div>
+      </div>
+      <div class="dept-card-body">
+        <div class="dept-stat">
+          <span class="stat-badge" style="background:${dept.bgHex};color:${dept.colorHex};">🔵 进行中 ${active}</span>
+          <span class="stat-badge" style="background:#FBF2E6;color:#B87533;">🌱 计划中 ${planned}</span>
+          <span class="stat-badge" style="background:#F5F5F5;color:#777;">✅ 完成 ${done}</span>
+        </div>
+        <div style="margin-top:12px;">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-soft);margin-bottom:5px;"><span>项目完成率</span><span>${pct}%</span></div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%;background:${dept.colorHex};"></div></div>
+        </div>
+      </div>
+      <div class="dept-card-footer">
+        <span class="text-soft">${total} 个项目</span>
+        <button class="view-btn-sm" style="color:${dept.colorHex};">查看详情 →</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// DEPARTMENTS
+// ══════════════════════════════════════════════════════════
+
+function renderDeptList() {
+  document.getElementById('dept-list-view').style.display = '';
+  document.getElementById('dept-detail-view').style.display = 'none';
+  const grid = document.getElementById('dept-cards-grid');
+  grid.innerHTML = '';
+  state.departments.forEach(dept => {
+    const active = dept.projects.filter(p => p.status === 'active').length;
+    const total  = dept.projects.length;
+    const done   = dept.projects.filter(p => p.status === 'done').length;
+    const planned= dept.projects.filter(p => p.status === 'planned').length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+
+    const card = document.createElement('div');
+    card.className = 'dept-card';
+    card.onclick = () => showDeptDetail(dept.id);
+    card.style.cursor = 'pointer';
+    card.innerHTML = `
+      <div class="dept-card-header" style="background:${dept.bgHex}30;border-bottom:1px solid ${dept.colorHex}22;">
+        <div class="dept-emoji">${dept.emoji}</div>
+        <div>
+          <div class="dept-card-title" style="color:${dept.colorHex};font-size:17px;">${dept.name}</div>
+          <div class="dept-card-sub" style="font-size:13px;">${dept.meaning.substring(0,60)}…</div>
+        </div>
+      </div>
+      <div style="padding:16px 22px 6px;">
+        <div style="font-size:12.5px;color:var(--text-soft);margin-bottom:10px;line-height:1.7;">
+          <strong style="color:var(--text-mid);">核心职责：</strong>${dept.duties.substring(0,80)}…
+        </div>
+        <div class="dept-stat" style="margin-bottom:12px;">
+          <span class="stat-badge" style="background:${dept.bgHex};color:${dept.colorHex};">🔵 进行中 ${active}</span>
+          <span class="stat-badge" style="background:#FBF2E6;color:#B87533;">🌱 计划中 ${planned}</span>
+          <span class="stat-badge" style="background:#F5F5F5;color:#777;">✅ 完成 ${done}</span>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-soft);margin-bottom:5px;"><span>项目完成率</span><span>${pct}%</span></div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%;background:${dept.colorHex};"></div></div>
+        </div>
+      </div>
+      <div class="dept-card-footer">
+        <span class="text-soft">${total} 个项目</span>
+        <button class="view-btn-sm" style="color:${dept.colorHex};">查看 / 编辑详情 →</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function showDeptList() {
+  document.getElementById('dept-list-view').style.display = '';
+  document.getElementById('dept-detail-view').style.display = 'none';
+  renderDeptList();
+}
+
+function showDeptDetail(deptId) {
+  currentDeptDetailId = deptId;
+  const dept = state.departments.find(d => d.id === deptId);
+  document.getElementById('dept-list-view').style.display = 'none';
+  document.getElementById('dept-detail-view').style.display = '';
+  document.getElementById('dept-detail-breadcrumb').textContent = dept.emoji + ' ' + dept.name;
+
+  const container = document.getElementById('dept-detail-content');
+  container.innerHTML = '';
+
+  // Banner
+  const banner = document.createElement('div');
+  banner.className = 'section-banner';
+  banner.style.background = `linear-gradient(135deg, ${dept.colorHex}dd, ${dept.colorHex}88)`;
+  banner.innerHTML = `
+    <div class="part-label">部门详情</div>
+    <h1>${dept.emoji} ${dept.name}</h1>
+    <p>${dept.meaning.substring(0,80)}…</p>`;
+  container.appendChild(banner);
+
+  // Meaning & duties
+  const info = document.createElement('div');
+  info.className = 'grid-2';
+  info.style.marginBottom = '24px';
+  info.innerHTML = `
+    <div class="card">
+      <div class="flex-between mb-16">
+        <div class="sub-title" style="margin-bottom:0;color:${dept.colorHex};">🌱 存在意义</div>
+        <button class="icon-btn" onclick="openDeptInfoModal('${dept.id}')">✏️</button>
+      </div>
+      <div style="font-size:13.5px;line-height:1.8;color:var(--text-mid);">${dept.meaning}</div>
+    </div>
+    <div class="card">
+      <div class="flex-between mb-16">
+        <div class="sub-title" style="margin-bottom:0;color:${dept.colorHex};">⚙️ 核心职责</div>
+        <button class="icon-btn" onclick="openDeptInfoModal('${dept.id}')">✏️</button>
+      </div>
+      <div style="font-size:13.5px;line-height:1.8;color:var(--text-mid);">${dept.duties}</div>
+    </div>`;
+  container.appendChild(info);
+
+  // Goals
+  const goalsBlock = document.createElement('div');
+  goalsBlock.style.marginBottom = '28px';
+  goalsBlock.innerHTML = `
+    <div class="flex-between mb-16">
+      <div class="section-title" style="margin-bottom:0;">🎯 部门目标</div>
+      <button class="btn-secondary" style="font-size:12px;padding:6px 14px;" onclick="openGoalModal('${dept.id}')">✏️ 编辑目标</button>
+    </div>
+    <div class="goals-grid">
+      <div class="goal-card" style="background:${dept.bgHex};border-color:${dept.colorHex}44;">
+        <div class="goal-card-label" style="color:${dept.colorHex};">🟢 短期目标（1-3个月）</div>
+        <div class="goal-card-text" id="goal-short-${dept.id}">${dept.goals.short}</div>
+      </div>
+      <div class="goal-card" style="background:${dept.bgHex}88;border-color:${dept.colorHex}33;">
+        <div class="goal-card-label" style="color:${dept.colorHex}bb;">🔵 中期目标（3-12个月）</div>
+        <div class="goal-card-text" id="goal-mid-${dept.id}">${dept.goals.mid}</div>
+      </div>
+      <div class="goal-card" style="background:${dept.bgHex}55;border-color:${dept.colorHex}22;">
+        <div class="goal-card-label" style="color:${dept.colorHex}99;">⭐ 长期目标（1年以上）</div>
+        <div class="goal-card-text" id="goal-long-${dept.id}">${dept.goals.long}</div>
+      </div>
+    </div>`;
+  container.appendChild(goalsBlock);
+
+  // Projects
+  const projs = document.createElement('div');
+  projs.innerHTML = `<div class="section-title">🗂️ 项目档案</div>`;
+  container.appendChild(projs);
+
+  ['done','active','planned'].forEach(status => {
+    const statusCfg = {
+      done:    { label: '✅ 已完成的项目', color: '#777' },
+      active:  { label: '🔵 正在进行的项目', color: dept.colorHex },
+      planned: { label: '🌱 计划中的项目', color: '#B87533' }
+    };
+    const items = dept.projects.filter(p => p.status === status);
+    const group = document.createElement('div');
+    group.className = 'project-group';
+    group.innerHTML = `<div class="project-group-title" style="color:${statusCfg[status].color};">${statusCfg[status].label}</div>`;
+    const list = document.createElement('div');
+    list.className = 'project-list';
+    items.forEach(proj => {
+      const accentColor = status==='active'?dept.colorHex:status==='planned'?'#D4975A':'#C0B8B0';
+      const hasModule = proj.dailyModule && proj.dailyModule.title;
+      const moduleHtml = hasModule
+        ? `<div class="project-module-section">
+            <div class="module-collapsed-preview" onclick="showModulePanel('${proj.id}')">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:15px;">📋</span>
+                <div>
+                  <div style="font-size:12px;font-weight:700;color:${dept.colorHex};">${proj.dailyModule.title}</div>
+                  <div style="font-size:11.5px;color:var(--text-soft);">${proj.dailyModule.frequency || ''}</div>
+                </div>
+              </div>
+              <span style="font-size:12px;color:${dept.colorHex};font-weight:600;">查看指南 →</span>
+            </div>
+           </div>`
+        : (status === 'active'
+            ? `<div class="project-module-section">
+                <button class="add-btn" style="border-style:dashed;padding:8px 14px;font-size:12.5px;" onclick="openDailyModuleModal('${proj.id}')">
+                  <span>📋</span> 为此项目添加每日实践模块
+                </button>
+               </div>`
+            : '');
+
+      const itemEl = document.createElement('div');
+      itemEl.className = 'project-item';
+      itemEl.style.borderLeft = `4px solid ${accentColor}`;
+      itemEl.style.display = 'block';
+      itemEl.style.padding = '14px 18px 12px 22px';
+      itemEl.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div class="project-item-body" style="flex:1;">
+            <div class="project-item-name">${proj.name} ${statusBadge(proj.status)}</div>
+            <div class="project-item-desc">${proj.desc}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;padding-top:2px;">
+            <button class="icon-btn" onclick="openProjectModal('${dept.id}','${proj.id}')" title="编辑项目">✏️</button>
+            <button class="icon-btn del" onclick="deleteProject('${dept.id}','${proj.id}')" title="删除项目">🗑</button>
+          </div>
+        </div>
+        ${moduleHtml}`;
+      list.appendChild(itemEl);
+    });
+    group.appendChild(list);
+    // add button
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-btn';
+    addBtn.style.marginTop = '10px';
+    addBtn.innerHTML = `<span style="font-size:16px;">+</span> 添加${statusCfg[status].label.replace(/^[✅🔵🌱]\s/,'')}项目`;
+    addBtn.onclick = () => openProjectModal(dept.id, null, status);
+    group.appendChild(addBtn);
+    container.appendChild(group);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// DAILY VIEW
+// ══════════════════════════════════════════════════════════
+
+function renderDaily() {
+  // today date
+  const d = new Date();
+  document.getElementById('today-date').textContent = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+
+  renderScheduleBlocks();
+  renderNutrition();
+  renderMinVersion();
+  renderReflection();
+}
+
+function renderScheduleBlocks() {
+  const container = document.getElementById('schedule-blocks');
+  container.innerHTML = '';
+  state.schedule.forEach(block => {
+    const div = document.createElement('div');
+    div.className = 'schedule-block';
+    const doneCount = block.items.filter(i => i.checked).length;
+    const total = block.items.length;
+    div.innerHTML = `
+      <div class="schedule-header" style="background:${block.color};">
+        <span style="font-size:16px;">${block.period.split(' ')[0]}</span>
+        <span>${block.period.replace(/^[^\s]+\s/,'')}</span>
+        <span style="font-size:12px;background:rgba(255,255,255,.15);padding:2px 10px;border-radius:10px;margin-left:auto;">${block.time_range}</span>
+        <span style="font-size:12px;background:rgba(255,255,255,.15);padding:2px 10px;border-radius:10px;">${doneCount}/${total}</span>
+      </div>
+      <table class="schedule-table">
+        <colgroup><col style="width:90px"><col><col style="width:150px"><col style="width:36px"></colgroup>
+        <thead><tr><th>时间</th><th>行动项目</th><th>来源项目</th><th></th></tr></thead>
+        <tbody id="tbody-${block.id}"></tbody>
+      </table>
+      <button class="schedule-add-btn" onclick="openScheduleModal('${block.id}',null)">+ 添加事项</button>`;
+    container.appendChild(div);
+    renderScheduleTbody(block);
+  });
+}
+
+function renderScheduleTbody(block) {
+  const tbody = document.getElementById('tbody-' + block.id);
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  block.items.forEach(item => {
+    // Find linked project module
+    let moduleBtn = '';
+    if (item.projectId) {
+      const allProjects = state.departments.flatMap(d => d.projects);
+      const proj = allProjects.find(p => p.id === item.projectId);
+      if (proj && proj.dailyModule && proj.dailyModule.title) {
+        const dept = state.departments.find(d => d.projects.some(p => p.id === item.projectId));
+        const color = dept ? dept.colorHex : '#4E7354';
+        moduleBtn = `<button class="schedule-module-btn" style="color:${color};border-color:${color}33;background:${color}0D;" onclick="showModulePanel('${item.projectId}')">📋 查看模块</button>`;
+      }
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="time-cell">${item.time}</td>
+      <td>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <div class="check-box ${item.checked?'checked':''}" onclick="toggleCheck('${block.id}','${item.id}')">✓</div>
+            <span style="${item.checked?'text-decoration:line-through;color:var(--text-soft);':''}">${item.task}</span>
+          </label>
+          ${moduleBtn ? `<div style="padding-left:28px;">${moduleBtn}</div>` : ''}
+        </div>
+      </td>
+      <td><span class="source-tag" style="background:${block.color}18;color:${block.color};">${item.source}</span></td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="icon-btn" style="width:24px;height:24px;font-size:11px;" onclick="openScheduleModal('${block.id}','${item.id}')" title="编辑">✏️</button>
+          <button class="icon-btn del" style="width:24px;height:24px;font-size:11px;" onclick="deleteScheduleItem('${block.id}','${item.id}')" title="删除">🗑</button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleCheck(blockId, itemId) {
+  const block = state.schedule.find(b => b.id === blockId);
+  const item  = block.items.find(i => i.id === itemId);
+  item.checked = !item.checked;
+  renderScheduleTbody(block);
+  // update header count
+  const doneCount = block.items.filter(i => i.checked).length;
+  const headerBadges = document.querySelectorAll(`#schedule-blocks .schedule-header`);
+  // simple re-render
+  renderScheduleBlocks();
+}
+
+function resetChecks() {
+  state.schedule.forEach(b => b.items.forEach(i => i.checked = false));
+  renderScheduleBlocks();
+  showToast('今日打勾已重置');
+}
+
+function renderNutrition() {
+  const div = document.getElementById('nutrition-display');
+  div.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <div style="font-size:11.5px;font-weight:700;color:var(--green);margin-bottom:6px;">✅ 积极摄入</div>
+        <ul class="nutrition-list">${state.nutrition.good.map(g=>`<li>${g}</li>`).join('')}</ul>
+      </div>
+      <div>
+        <div style="font-size:11.5px;font-weight:700;color:var(--rose);margin-bottom:6px;">⚠️ 减少避免</div>
+        <ul class="nutrition-list">${state.nutrition.avoid.map(a=>`<li>${a}</li>`).join('')}</ul>
+      </div>
+    </div>`;
+}
+
+function renderMinVersion() {
+  const div = document.getElementById('min-version-list');
+  div.innerHTML = state.minVersion.map(m =>
+    `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--warm);font-size:13px;">
+      <span style="font-size:18px;">${m.icon}</span>
+      <span style="color:var(--text-mid);">${m.text}</span>
+    </div>`
+  ).join('') + `<div style="text-align:center;margin-top:10px;font-size:12.5px;color:var(--text-soft);">完成以上五点 = 今天100分 🌸</div>`;
+}
+
+function renderReflection() {
+  const div = document.getElementById('reflection-rows');
+  div.innerHTML = '';
+  state.reflectionPrompts.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.style.marginBottom = '10px';
+    row.innerHTML = `
+      <div style="font-size:12.5px;font-weight:600;color:${p.color};margin-bottom:5px;">${p.label}</div>
+      <textarea class="reflection-area" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;" placeholder="${p.placeholder}" id="reflect-${i}"></textarea>`;
+    div.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// VISION VIEW
+// ══════════════════════════════════════════════════════════
+
+function renderVision() {
+  const adEl = document.getElementById('vision-abstract-display');
+  const coEl = document.getElementById('vision-concrete-display');
+  adEl.textContent = state.vision.abstract || '';
+  adEl.className = 'vision-text' + (state.vision.abstract ? '' : ' placeholder');
+  if (!state.vision.abstract) adEl.textContent = '点击右上角编辑按钮，写下你的愿景宣言…';
+  coEl.textContent = state.vision.concrete || '';
+  coEl.className = 'vision-text' + (state.vision.concrete ? '' : ' placeholder');
+  if (!state.vision.concrete) coEl.textContent = '点击右上角编辑按钮，描述你的十年理想画面…';
+}
+
+// ══════════════════════════════════════════════════════════
+// MODALS
+// ══════════════════════════════════════════════════════════
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+function openVisionModal(field) {
+  currentVisionField = field;
+  const titles = { abstract: '编辑愿景宣言（抽象层）', concrete: '编辑十年理想画面（具象层）' };
+  document.getElementById('modal-vision-title').textContent = titles[field];
+  document.getElementById('vision-edit-input').value = state.vision[field] || '';
+  openModal('modal-vision');
+}
+
+function saveVision() {
+  state.vision[currentVisionField] = document.getElementById('vision-edit-input').value;
+  closeModal('modal-vision');
+  renderVision();
+  renderOverview();
+  showToast('愿景已更新');
+}
+
+function openProjectModal(deptId, projectId, defaultStatus = 'active') {
+  currentProjectDept = deptId;
+  currentProjectId = projectId;
+  const dept = state.departments.find(d => d.id === deptId);
+  document.getElementById('project-edit-dept').value = deptId;
+  document.getElementById('project-edit-id').value = projectId || '';
+  if (projectId) {
+    const proj = dept.projects.find(p => p.id === projectId);
+    document.getElementById('modal-project-title').textContent = '编辑项目';
+    document.getElementById('project-edit-name').value = proj.name;
+    document.getElementById('project-edit-status').value = proj.status;
+    document.getElementById('project-edit-desc').value = proj.desc;
+  } else {
+    document.getElementById('modal-project-title').textContent = '添加新项目';
+    document.getElementById('project-edit-name').value = '';
+    document.getElementById('project-edit-status').value = defaultStatus;
+    document.getElementById('project-edit-desc').value = '';
+  }
+  openModal('modal-project');
+}
+
+function saveProject() {
+  const deptId = document.getElementById('project-edit-dept').value;
+  const projId = document.getElementById('project-edit-id').value;
+  const name   = document.getElementById('project-edit-name').value.trim();
+  const status = document.getElementById('project-edit-status').value;
+  const desc   = document.getElementById('project-edit-desc').value.trim();
+  if (!name) { showToast('请填写项目名称'); return; }
+  const dept = state.departments.find(d => d.id === deptId);
+  if (projId) {
+    const proj = dept.projects.find(p => p.id === projId);
+    proj.name = name; proj.status = status; proj.desc = desc;
+  } else {
+    dept.projects.push({ id: uid(), name, status, desc });
+  }
+  closeModal('modal-project');
+  showDeptDetail(deptId);
+  showToast(projId ? '项目已更新' : '项目已添加');
+}
+
+function deleteProject(deptId, projId) {
+  if (!confirm('确定要删除这个项目吗？')) return;
+  const dept = state.departments.find(d => d.id === deptId);
+  dept.projects = dept.projects.filter(p => p.id !== projId);
+  showDeptDetail(deptId);
+  showToast('项目已删除');
+}
+
+function openGoalModal(deptId) {
+  currentGoalDept = deptId;
+  const dept = state.departments.find(d => d.id === deptId);
+  document.getElementById('goal-edit-dept').value = deptId;
+  document.getElementById('goal-short').value = dept.goals.short;
+  document.getElementById('goal-mid').value = dept.goals.mid;
+  document.getElementById('goal-long').value = dept.goals.long;
+  openModal('modal-goal');
+}
+
+function saveGoal() {
+  const deptId = document.getElementById('goal-edit-dept').value;
+  const dept = state.departments.find(d => d.id === deptId);
+  dept.goals.short = document.getElementById('goal-short').value;
+  dept.goals.mid   = document.getElementById('goal-mid').value;
+  dept.goals.long  = document.getElementById('goal-long').value;
+  closeModal('modal-goal');
+  showDeptDetail(deptId);
+  showToast('目标已更新');
+}
+
+function openDeptInfoModal(deptId) {
+  const dept = state.departments.find(d => d.id === deptId);
+  document.getElementById('dept-info-id').value = deptId;
+  document.getElementById('dept-info-meaning').value = dept.meaning;
+  document.getElementById('dept-info-duties').value = dept.duties;
+  openModal('modal-dept-info');
+}
+
+function saveDeptInfo() {
+  const deptId = document.getElementById('dept-info-id').value;
+  const dept = state.departments.find(d => d.id === deptId);
+  dept.meaning = document.getElementById('dept-info-meaning').value;
+  dept.duties  = document.getElementById('dept-info-duties').value;
+  closeModal('modal-dept-info');
+  showDeptDetail(deptId);
+  showToast('部门信息已更新');
+}
+
+function openScheduleModal(periodId, itemId) {
+  currentSchedPeriod = periodId;
+  currentSchedId = itemId;
+  const block = state.schedule.find(b => b.id === periodId);
+
+  // Populate project dropdown (only projects with dailyModule)
+  const sel = document.getElementById('sched-edit-project');
+  sel.innerHTML = '<option value="">— 不关联项目 —</option>';
+  state.departments.forEach(dept => {
+    dept.projects.filter(p => p.status === 'active').forEach(proj => {
+      const opt = document.createElement('option');
+      opt.value = proj.id;
+      opt.textContent = dept.emoji + ' ' + proj.name + (proj.dailyModule ? ' 📋' : '');
+      sel.appendChild(opt);
+    });
+  });
+
+  if (itemId) {
+    const item = block.items.find(i => i.id === itemId);
+    document.getElementById('modal-schedule-title').textContent = '编辑事项';
+    document.getElementById('sched-edit-time').value    = item.time;
+    document.getElementById('sched-edit-task').value    = item.task;
+    document.getElementById('sched-edit-source').value  = item.source;
+    document.getElementById('sched-edit-project').value = item.projectId || '';
+  } else {
+    document.getElementById('modal-schedule-title').textContent = '添加事项';
+    document.getElementById('sched-edit-time').value    = '';
+    document.getElementById('sched-edit-task').value    = '';
+    document.getElementById('sched-edit-source').value  = '';
+    document.getElementById('sched-edit-project').value = '';
+  }
+  document.getElementById('sched-edit-period').value = periodId;
+  document.getElementById('sched-edit-id').value     = itemId || '';
+  openModal('modal-schedule');
+}
+
+function saveScheduleItem() {
+  const periodId  = document.getElementById('sched-edit-period').value;
+  const itemId    = document.getElementById('sched-edit-id').value;
+  const time      = document.getElementById('sched-edit-time').value.trim();
+  const task      = document.getElementById('sched-edit-task').value.trim();
+  const source    = document.getElementById('sched-edit-source').value.trim();
+  const projectId = document.getElementById('sched-edit-project').value || null;
+  if (!task) { showToast('请填写行动项目'); return; }
+  const block = state.schedule.find(b => b.id === periodId);
+  if (itemId) {
+    const item = block.items.find(i => i.id === itemId);
+    item.time = time; item.task = task; item.source = source; item.projectId = projectId;
+  } else {
+    block.items.push({ id: uid(), time, task, source, projectId, checked: false });
+  }
+  closeModal('modal-schedule');
+  renderScheduleBlocks();
+  showToast(itemId ? '事项已更新' : '事项已添加');
+}
+
+function deleteScheduleItem(blockId, itemId) {
+  if (!confirm('确定要删除这条事项吗？')) return;
+  const block = state.schedule.find(b => b.id === blockId);
+  block.items = block.items.filter(i => i.id !== itemId);
+  renderScheduleBlocks();
+  showToast('事项已删除');
+}
+
+function openNutritionModal() {
+  document.getElementById('nutrition-good-input').value  = state.nutrition.good.join('\n');
+  document.getElementById('nutrition-avoid-input').value = state.nutrition.avoid.join('\n');
+  openModal('modal-nutrition');
+}
+
+function saveNutrition() {
+  state.nutrition.good  = document.getElementById('nutrition-good-input').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  state.nutrition.avoid = document.getElementById('nutrition-avoid-input').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  closeModal('modal-nutrition');
+  renderNutrition();
+  showToast('营养清单已更新');
+}
+
+// ══════════════════════════════════════════════════════════
+// DAILY MODULE PANEL & MODAL
+// ══════════════════════════════════════════════════════════
+
+let currentModuleProjectId = null;
+
+function findProjectById(projId) {
+  for (const dept of state.departments) {
+    const proj = dept.projects.find(p => p.id === projId);
+    if (proj) return { proj, dept };
+  }
+  return null;
+}
+
+function showModulePanel(projId) {
+  const found = findProjectById(projId);
+  if (!found) return;
+  const { proj, dept } = found;
+  currentModuleProjectId = projId;
+
+  const mod = proj.dailyModule;
+  if (!mod || !mod.title) {
+    openDailyModuleModal(projId);
+    return;
+  }
+
+  // Header
+  document.getElementById('module-panel-dept').textContent = dept.emoji + ' ' + dept.name;
+  document.getElementById('module-panel-proj').textContent = proj.name;
+  document.getElementById('module-panel-title').textContent = mod.title;
+  document.getElementById('module-panel-title').style.color = dept.colorHex;
+
+  const freqEl = document.getElementById('module-panel-freq');
+  freqEl.textContent = '⏰ ' + (mod.frequency || '每日执行');
+  freqEl.style.background = dept.bgHex;
+  freqEl.style.color = dept.colorHex;
+  freqEl.style.border = `1.5px solid ${dept.colorHex}44`;
+
+  // Body
+  const body = document.getElementById('module-panel-body');
+  let stepsHTML = '';
+  if (mod.steps && mod.steps.length) {
+    mod.steps.forEach((step, i) => {
+      stepsHTML += `
+        <div class="module-step" style="border-color:${dept.colorHex}22;">
+          <div class="module-step-icon">${step.icon || (i + 1) + '.'}</div>
+          <div>
+            <div class="module-step-label" style="color:${dept.colorHex};">${step.label || ''}</div>
+            <div class="module-step-text">${step.text}</div>
+          </div>
+        </div>`;
+    });
+  }
+  const notesHTML = mod.notes
+    ? `<div class="module-notes"><strong style="color:var(--amber);">💛 温馨提示</strong><br>${mod.notes}</div>`
+    : '';
+  body.innerHTML = stepsHTML + notesHTML;
+
+  // Slide in
+  const overlay = document.getElementById('module-panel-overlay');
+  const panel   = document.getElementById('module-panel');
+  overlay.style.opacity = '1';
+  overlay.style.pointerEvents = 'all';
+  panel.style.transform = 'translateX(0)';
+}
+
+function closeModulePanel() {
+  const overlay = document.getElementById('module-panel-overlay');
+  const panel   = document.getElementById('module-panel');
+  overlay.style.opacity = '0';
+  overlay.style.pointerEvents = 'none';
+  panel.style.transform = 'translateX(100%)';
+}
+
+function openDailyModuleModal(projId) {
+  const found = findProjectById(projId);
+  if (!found) return;
+  const { proj, dept } = found;
+  document.getElementById('dailymod-proj-id').value = projId;
+  document.getElementById('modal-dailymod-title').textContent = `编辑每日实践模块 · ${proj.name}`;
+
+  const mod = proj.dailyModule || { title: '', frequency: '', steps: [], notes: '' };
+  document.getElementById('dailymod-title').value = mod.title || '';
+  document.getElementById('dailymod-freq').value  = mod.frequency || '';
+  document.getElementById('dailymod-notes').value = mod.notes || '';
+
+  // Steps to text: "icon label | text"
+  const stepsText = (mod.steps || []).map(s => `${s.icon || ''} ${s.label || ''} | ${s.text}`).join('\n');
+  document.getElementById('dailymod-steps').value = stepsText;
+
+  closeModulePanel();
+  openModal('modal-dailymod');
+}
+
+function saveDailyModule() {
+  const projId = document.getElementById('dailymod-proj-id').value;
+  const found = findProjectById(projId);
+  if (!found) return;
+  const { proj } = found;
+
+  const title = document.getElementById('dailymod-title').value.trim();
+  const freq  = document.getElementById('dailymod-freq').value.trim();
+  const notes = document.getElementById('dailymod-notes').value.trim();
+  const rawSteps = document.getElementById('dailymod-steps').value.trim();
+
+  // Parse steps: each line "emoji label | text content"
+  const steps = rawSteps.split('\n').filter(Boolean).map(line => {
+    const sepIdx = line.indexOf('|');
+    if (sepIdx === -1) return { icon: '▪', label: '', text: line.trim() };
+    const left  = line.substring(0, sepIdx).trim();
+    const text  = line.substring(sepIdx + 1).trim();
+    // Extract emoji (first char group) and label
+    const emojiMatch = left.match(/^(\S+)\s+(.*)/);
+    if (emojiMatch) return { icon: emojiMatch[1], label: emojiMatch[2].trim(), text };
+    return { icon: '▪', label: left, text };
+  });
+
+  proj.dailyModule = { title, frequency: freq, steps, notes };
+  closeModal('modal-dailymod');
+
+  // Refresh current view
+  const deptDetailVisible = document.getElementById('dept-detail-view')?.style.display !== 'none';
+  if (deptDetailVisible && currentDeptDetailId) {
+    showDeptDetail(currentDeptDetailId);
+  } else {
+    renderScheduleBlocks();
+  }
+  // Show the panel immediately after saving
+  setTimeout(() => showModulePanel(projId), 100);
+  showToast('每日实践模块已保存');
+}
+
+// ══════════════════════════════════════════════════════════
+// MINDMAP ENGINE
+// ══════════════════════════════════════════════════════════
+
+const MM = {
+  transform: { x: 0, y: 0, scale: 1 },
+  showProjects: true,
+  showDaily: true,
+  dragging: false,
+  lastMouse: { x: 0, y: 0 },
+  nodes: [],    // flat list of rendered nodes
+  hoverId: null,
+};
+
+// ── Layout constants ────────────────────────────────────
+const MM_LEAF_H  = 52;    // vertical slot per leaf
+const MM_DEPT_GAP = 36;   // extra gap between dept subtrees
+const MM_X_ROOT  = 0;
+const MM_X_DEPT  = 290;   // root → dept
+const MM_X_PROJ  = 240;   // dept → project
+const MM_X_DAILY = 210;   // project → daily task
+
+// Node visual dimensions
+const MM_SIZES = {
+  root:    { w: 130, h: 52, r: 26 },
+  dept:    { w: 168, h: 42, r: 21 },
+  project: { w: 186, h: 36, r: 7  },
+  daily:   { w: 196, h: 30, r: 5  },
+};
+
+// ── Build tree data ──────────────────────────────────────
+function mmBuildTree() {
+  // Match daily tasks to active projects by source text
+  function getDailyForProject(proj) {
+    if (!MM.showDaily || proj.status !== 'active') return [];
+    const keyRaw = proj.name.replace(/（.*）/g,'').replace(/[（\(].*/,'').trim();
+    const key = keyRaw.substring(0, Math.min(keyRaw.length, 8));
+    const matches = [];
+    state.schedule.forEach(block => {
+      block.items.forEach(item => {
+        if (item.source && item.source.includes(key.substring(0,6))) {
+          matches.push({ id: item.id, label: item.task, time: item.time, blockColor: block.color });
+        }
+      });
+    });
+    // Deduplicate and limit
+    const seen = new Set();
+    return matches.filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; }).slice(0, 3);
+  }
+
+  function buildDeptNode(dept) {
+    const projNodes = !MM.showProjects ? [] : dept.projects.map(proj => {
+      const dailyItems = getDailyForProject(proj);
+      return {
+        type: 'project', id: proj.id, deptId: dept.id,
+        label: proj.name.length > 15 ? proj.name.substring(0,15) + '…' : proj.name,
+        fullLabel: proj.name, desc: proj.desc,
+        status: proj.status, color: dept.colorHex, bg: dept.bgHex,
+        children: dailyItems.map(d => ({
+          type: 'daily', id: d.id,
+          label: d.task.length > 16 ? d.task.substring(0,16) + '…' : d.task,
+          fullLabel: d.task, time: d.time,
+          color: '#B87533', bg: '#FDF3E7',
+          blockColor: d.blockColor,
+          children: []
+        }))
+      };
+    });
+    return {
+      type: 'dept', id: dept.id,
+      label: dept.emoji + ' ' + dept.name,
+      fullLabel: dept.name, meaning: dept.meaning,
+      color: dept.colorHex, bg: dept.bgHex,
+      children: projNodes
+    };
+  }
+
+  const depts = state.departments.map(buildDeptNode);
+  return {
+    root: {
+      type: 'root', id: 'root',
+      label: '🌸 人生重启系统',
+      sublabel: 'Life Restart System',
+      children: depts
+    },
+    right: [depts[0], depts[1]],
+    left:  [depts[2], depts[3]]
+  };
+}
+
+// ── Count leaf nodes ──────────────────────────────────────
+function mmLeafCount(node) {
+  if (!node.children || node.children.length === 0) return 1;
+  return node.children.reduce((s, c) => s + mmLeafCount(c), 0);
+}
+
+// ── Assign Y positions recursively ────────────────────────
+// Returns the next available y after placing this subtree
+function mmAssignY(node, y0) {
+  if (!node.children || node.children.length === 0) {
+    node.y = y0 + MM_LEAF_H / 2;
+    return y0 + MM_LEAF_H;
+  }
+  let y = y0;
+  for (const child of node.children) {
+    y = mmAssignY(child, y);
+  }
+  const firstY = node.children[0].y;
+  const lastY  = node.children[node.children.length - 1].y;
+  node.y = (firstY + lastY) / 2;
+  return y;
+}
+
+// ── Assign X positions ────────────────────────────────────
+function mmAssignX(node, x, side) {
+  node.x = x;
+  node.side = side;
+  if (!node.children) return;
+  let nextX;
+  if (node.type === 'root') {
+    // Root's children split left and right — handled outside
+    return;
+  } else if (node.type === 'dept') {
+    nextX = side === 'right' ? x + MM_X_PROJ : x - MM_X_PROJ;
+  } else if (node.type === 'project') {
+    nextX = side === 'right' ? x + MM_X_DAILY : x - MM_X_DAILY;
+  } else {
+    return;
+  }
+  node.children.forEach(c => mmAssignX(c, nextX, side));
+}
+
+// ── Full layout computation ───────────────────────────────
+function mmLayout(tree) {
+  const { right, left } = tree;
+
+  // Right side: dept 0 on top, dept 1 below
+  // Calculate total height for right side
+  let rightLeaves = right.reduce((s, d) => s + mmLeafCount(d), 0);
+  let rightH = rightLeaves * MM_LEAF_H + (right.length - 1) * MM_DEPT_GAP;
+
+  // Left side
+  let leftLeaves = left.reduce((s, d) => s + mmLeafCount(d), 0);
+  let leftH = leftLeaves * MM_LEAF_H + (left.length - 1) * MM_DEPT_GAP;
+
+  // Total virtual canvas height
+  const totalH = Math.max(rightH, leftH);
+  const centerY = totalH / 2;
+
+  // Layout right depts
+  let ry = centerY - rightH / 2;
+  for (const dept of right) {
+    const leaves = mmLeafCount(dept);
+    const allocated = leaves * MM_LEAF_H;
+    mmAssignY(dept, ry);
+    // X
+    const deptX = MM_X_ROOT + MM_X_DEPT;
+    mmAssignX(dept, deptX, 'right');
+    ry += allocated + MM_DEPT_GAP;
+  }
+
+  // Layout left depts
+  let ly = centerY - leftH / 2;
+  for (const dept of left) {
+    const leaves = mmLeafCount(dept);
+    const allocated = leaves * MM_LEAF_H;
+    mmAssignY(dept, ly);
+    const deptX = MM_X_ROOT - MM_X_DEPT;
+    mmAssignX(dept, deptX, 'left');
+    ly += allocated + MM_DEPT_GAP;
+  }
+
+  // Root node centered at centerY
+  tree.root.x = MM_X_ROOT;
+  tree.root.y = centerY;
+
+  return { tree, totalH, centerY };
+}
+
+// ── SVG drawing helpers ───────────────────────────────────
+function mmRoundRect(x, y, w, h, r) {
+  const x1 = x - w/2, y1 = y - h/2, x2 = x + w/2, y2 = y + h/2;
+  return `M${x1+r},${y1} H${x2-r} Q${x2},${y1} ${x2},${y1+r} V${y2-r} Q${x2},${y2} ${x2-r},${y2} H${x1+r} Q${x1},${y2} ${x1},${y2-r} V${y1+r} Q${x1},${y1} ${x1+r},${y1} Z`;
+}
+
+function mmBezier(x1, y1, x2, y2, side) {
+  const mx = (x1 + x2) / 2;
+  return `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+}
+
+function mmNodeSVG(node) {
+  const s = MM_SIZES[node.type] || MM_SIZES.project;
+  const { x, y } = node;
+  let fill, stroke, strokeW, textColor, strokeDash = '';
+
+  if (node.type === 'root') {
+    fill = 'url(#mm-root-grad)';
+    stroke = 'none'; strokeW = 0; textColor = '#fff';
+  } else if (node.type === 'dept') {
+    fill = node.color;
+    stroke = 'none'; strokeW = 0; textColor = '#fff';
+  } else if (node.type === 'project') {
+    const statusStyles = {
+      active:  { fill: node.bg, stroke: node.color, sw: 2, dash: '', tc: node.color },
+      planned: { fill: '#FDF3E7', stroke: '#D4975A', sw: 2, dash: '5,3', tc: '#B87533' },
+      done:    { fill: '#F5F5F5', stroke: '#C0B8B0', sw: 1.5, dash: '', tc: '#888' }
+    };
+    const st = statusStyles[node.status] || statusStyles.done;
+    fill = st.fill; stroke = st.stroke; strokeW = st.sw;
+    strokeDash = st.dash ? `stroke-dasharray="${st.dash}"` : '';
+    textColor = st.tc;
+  } else { // daily
+    fill = '#FDF3E7'; stroke = '#D4975A'; strokeW = 1.5; textColor = '#A06020';
+  }
+
+  const filter = node.type === 'root' ? 'url(#mm-shadow-lg)' : node.type === 'dept' ? 'url(#mm-shadow)' : '';
+  const filterAttr = filter ? `filter="${filter}"` : '';
+
+  // Defs for root gradient need to go in defs, handle inline
+  let gradDef = '';
+  if (node.type === 'root') {
+    gradDef = `<defs><linearGradient id="mm-root-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5E8B63"/><stop offset="100%" stop-color="#2E5E3A"/></linearGradient></defs>`;
+  }
+
+  const clickHandler = `onclick="mmNodeClick('${node.type}','${node.id || ''}')"`;
+  const mouseoverHandler = `onmouseover="mmShowTooltip(event,'${node.type}','${node.id || ''}')"`;
+  const mouseoutHandler = `onmouseout="mmHideTooltip()"`;
+
+  let label = node.label || '';
+  // For root: two lines
+  let textSVG = '';
+  if (node.type === 'root') {
+    textSVG = `<text x="${x}" y="${y - 7}" text-anchor="middle" font-family="'Noto Serif SC',serif" font-size="14" font-weight="700" fill="${textColor}">${label}</text>
+    <text x="${x}" y="${y + 10}" text-anchor="middle" font-family="'Noto Sans SC',sans-serif" font-size="10" fill="rgba(255,255,255,0.7)">Life Restart System 2.0</text>`;
+  } else if (node.type === 'dept') {
+    // Single line centered
+    textSVG = `<text x="${x}" y="${y + 5}" text-anchor="middle" font-family="'Noto Serif SC',serif" font-size="13" font-weight="700" fill="${textColor}">${label}</text>`;
+  } else {
+    // Status dot for project
+    let dotColor = node.status === 'active' ? node.color : node.status === 'planned' ? '#D4975A' : '#C0B8B0';
+    let dot = node.type === 'project' ? `<circle cx="${x - s.w/2 + 10}" cy="${y}" r="3.5" fill="${dotColor}"/>` : `<text x="${x - s.w/2 + 9}" y="${y + 4}" font-size="10">☀</text>`;
+    textSVG = `${dot}<text x="${x - s.w/2 + 20}" y="${y + 4}" font-family="'Noto Sans SC',sans-serif" font-size="12" fill="${textColor}">${label}</text>`;
+  }
+
+  const cursor = (node.type === 'root' || node.type === 'dept' || node.type === 'project') ? 'cursor:pointer;' : 'cursor:default;';
+
+  return `<g class="mm-node mm-node-${node.type}" data-id="${node.id}" style="${cursor}" ${clickHandler} ${mouseoverHandler} ${mouseoutHandler}>
+    ${gradDef}
+    <path d="${mmRoundRect(x, y, s.w, s.h, s.r)}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}" ${strokeDash} ${filterAttr}/>
+    ${textSVG}
+  </g>`;
+}
+
+function mmLineColor(childNode) {
+  if (childNode.type === 'dept') return childNode.color + 'CC';
+  if (childNode.type === 'project') {
+    if (childNode.status === 'active') return childNode.color + '99';
+    if (childNode.status === 'planned') return '#D4975A88';
+    return '#C0B8B066';
+  }
+  if (childNode.type === 'daily') return '#D4975A66';
+  return '#C0B8B066';
+}
+
+// ── Collect all nodes ─────────────────────────────────────
+function mmFlattenNodes(node, result = []) {
+  result.push(node);
+  if (node.children) node.children.forEach(c => mmFlattenNodes(c, result));
+  return result;
+}
+
+// ── Main render ───────────────────────────────────────────
+function renderMindmap() {
+  const svg = document.getElementById('mm-svg');
+  if (!svg) return;
+
+  const wrap = document.getElementById('mm-wrap');
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight;
+
+  const { tree, totalH, centerY } = mmLayout(mmBuildTree());
+
+  // Collect all lines and nodes
+  let linesSVG = '';
+  let nodesSVG = '';
+
+  // Draw lines from root to left depts (left side exits root from left edge)
+  const rootS = MM_SIZES.root;
+  tree.left.forEach(dept => {
+    const x1 = tree.root.x - rootS.w / 2;
+    const y1 = tree.root.y;
+    const deptS = MM_SIZES.dept;
+    const x2 = dept.x + deptS.w / 2;
+    const y2 = dept.y;
+    linesSVG += `<path d="${mmBezier(x1,y1,x2,y2,'left')}" fill="none" stroke="${mmLineColor(dept)}" stroke-width="2.5" stroke-linecap="round"/>`;
+  });
+
+  // Draw lines from root to right depts
+  tree.right.forEach(dept => {
+    const x1 = tree.root.x + rootS.w / 2;
+    const y1 = tree.root.y;
+    const deptS = MM_SIZES.dept;
+    const x2 = dept.x - deptS.w / 2;
+    const y2 = dept.y;
+    linesSVG += `<path d="${mmBezier(x1,y1,x2,y2,'right')}" fill="none" stroke="${mmLineColor(dept)}" stroke-width="2.5" stroke-linecap="round"/>`;
+  });
+
+  // Draw all child lines recursively
+  function drawChildLines(node) {
+    if (!node.children) return;
+    const pS = MM_SIZES[node.type] || MM_SIZES.project;
+    node.children.forEach(child => {
+      const cS = MM_SIZES[child.type] || MM_SIZES.project;
+      let x1, x2;
+      if (node.side === 'right' || child.side === 'right') {
+        x1 = node.x + pS.w / 2;
+        x2 = child.x - cS.w / 2;
+      } else {
+        x1 = node.x - pS.w / 2;
+        x2 = child.x + cS.w / 2;
+      }
+      const lw = child.type === 'daily' ? 1.5 : 2;
+      const ldash = child.type === 'daily' ? ' stroke-dasharray="4,3"' : '';
+      linesSVG += `<path d="${mmBezier(x1, node.y, x2, child.y, child.side)}" fill="none" stroke="${mmLineColor(child)}" stroke-width="${lw}" stroke-linecap="round"${ldash}/>`;
+      drawChildLines(child);
+    });
+  }
+  [...tree.right, ...tree.left].forEach(dept => {
+    dept.side = dept.x > 0 ? 'right' : 'left';
+    drawChildLines(dept);
+  });
+
+  // Draw all nodes
+  const allNodes = mmFlattenNodes(tree.root);
+  MM.nodes = allNodes;
+  allNodes.forEach(n => { nodesSVG += mmNodeSVG(n); });
+
+  // Department group halos (subtle bg)
+  let halosSVG = '';
+  [...tree.right, ...tree.left].forEach(dept => {
+    const allDeptNodes = mmFlattenNodes(dept);
+    if (allDeptNodes.length < 2) return;
+    const xs = allDeptNodes.map(n => n.x);
+    const ys = allDeptNodes.map(n => n.y);
+    const pad = 30;
+    const bx = Math.min(...xs) - 100, by = Math.min(...ys) - pad;
+    const bw = Math.max(...xs) - bx + 110, bh = Math.max(...ys) - by + pad;
+    halosSVG += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="16" fill="${dept.color}08" stroke="${dept.color}18" stroke-width="1"/>`;
+  });
+
+  // Offset to center in viewport
+  const offsetX = W / 2;
+  const offsetY = H / 2 - centerY;
+
+  // Update transform considering pan
+  const tx = MM.transform.x + offsetX;
+  const ty = MM.transform.y + offsetY;
+  const sc = MM.transform.scale;
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="mm-root-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#5E8B63"/>
+        <stop offset="100%" stop-color="#2E5E3A"/>
+      </linearGradient>
+      <filter id="mm-shadow">
+        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(45,37,32,0.14)"/>
+      </filter>
+      <filter id="mm-shadow-lg">
+        <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(45,37,32,0.22)"/>
+      </filter>
+    </defs>
+    <g id="mm-canvas" transform="translate(${tx},${ty}) scale(${sc})">
+      <g id="mm-halos">${halosSVG}</g>
+      <g id="mm-lines">${linesSVG}</g>
+      <g id="mm-nodes">${nodesSVG}</g>
+    </g>`;
+
+  // Bind pan/zoom events
+  mmBindEvents(svg);
+}
+
+// ── Pan & Zoom ─────────────────────────────────────────────
+function mmBindEvents(svg) {
+  svg.onmousedown = (e) => {
+    if (e.target.closest('.mm-node[onclick]') && e.target.closest('.mm-node[onclick]').getAttribute('onclick') !== "mmNodeClick('root','')") {
+      // Don't start drag on clickable nodes — let click fire
+    }
+    MM.dragging = true;
+    MM.lastMouse = { x: e.clientX, y: e.clientY };
+    svg.style.cursor = 'grabbing';
+  };
+  svg.onmousemove = (e) => {
+    if (!MM.dragging) return;
+    const dx = e.clientX - MM.lastMouse.x;
+    const dy = e.clientY - MM.lastMouse.y;
+    MM.transform.x += dx;
+    MM.transform.y += dy;
+    MM.lastMouse = { x: e.clientX, y: e.clientY };
+    mmApplyTransform();
+  };
+  svg.onmouseup = () => { MM.dragging = false; svg.style.cursor = 'grab'; };
+  svg.onmouseleave = () => { MM.dragging = false; svg.style.cursor = 'grab'; };
+  svg.onwheel = (e) => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.1 : 0.91;
+    mmZoom(factor, e.clientX, e.clientY);
+  };
+  // Touch support
+  let lastTouchDist = null;
+  svg.ontouchstart = (e) => {
+    if (e.touches.length === 1) {
+      MM.dragging = true;
+      MM.lastMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    if (e.touches.length === 2) {
+      lastTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    }
+  };
+  svg.ontouchmove = (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && MM.dragging) {
+      const dx = e.touches[0].clientX - MM.lastMouse.x;
+      const dy = e.touches[0].clientY - MM.lastMouse.y;
+      MM.transform.x += dx; MM.transform.y += dy;
+      MM.lastMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      mmApplyTransform();
+    }
+    if (e.touches.length === 2 && lastTouchDist) {
+      const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      mmZoom(dist / lastTouchDist);
+      lastTouchDist = dist;
+    }
+  };
+  svg.ontouchend = () => { MM.dragging = false; lastTouchDist = null; };
+}
+
+function mmApplyTransform() {
+  const svg = document.getElementById('mm-svg');
+  const wrap = document.getElementById('mm-wrap');
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  const canvas = document.getElementById('mm-canvas');
+  if (!canvas) return;
+
+  // Recompute the base center offset + pan
+  const { totalH, centerY } = (() => {
+    const { tree, totalH, centerY } = mmLayout(mmBuildTree());
+    return { totalH, centerY };
+  })();
+
+  const offsetX = W / 2;
+  const offsetY = H / 2 - centerY;
+  const tx = MM.transform.x + offsetX;
+  const ty = MM.transform.y + offsetY;
+  canvas.setAttribute('transform', `translate(${tx},${ty}) scale(${MM.transform.scale})`);
+}
+
+function mmZoom(factor, pivotX, pivotY) {
+  const wrap = document.getElementById('mm-wrap');
+  const W = wrap ? wrap.clientWidth : window.innerWidth;
+  const H = wrap ? wrap.clientHeight : window.innerHeight;
+  const px = pivotX !== undefined ? pivotX - W/2 : 0;
+  const py = pivotY !== undefined ? pivotY - H/2 : 0;
+
+  const newScale = Math.min(Math.max(MM.transform.scale * factor, 0.25), 3);
+  const scaleDelta = newScale / MM.transform.scale;
+
+  MM.transform.x = px - (px - MM.transform.x) * scaleDelta;
+  MM.transform.y = py - (py - MM.transform.y) * scaleDelta;
+  MM.transform.scale = newScale;
+  mmApplyTransform();
+}
+
+function mmReset() {
+  MM.transform = { x: 0, y: 0, scale: 1 };
+  renderMindmap();
+}
+
+function mmToggleCollapse() {
+  MM.showProjects = !MM.showProjects;
+  if (!MM.showProjects) MM.showDaily = false;
+  const btn = document.getElementById('mm-collapse-btn');
+  btn.classList.toggle('active', !MM.showProjects);
+  renderMindmap();
+}
+
+function mmToggleDaily() {
+  MM.showDaily = !MM.showDaily;
+  const btn = document.getElementById('mm-daily-btn');
+  btn.classList.toggle('active', MM.showDaily);
+  renderMindmap();
+}
+
+// ── Click navigation ────────────────────────────────────────
+function mmNodeClick(type, id) {
+  if (MM.dragging) return;
+  if (type === 'root') { showView('overview'); return; }
+  if (type === 'dept') { showView('departments'); setTimeout(() => showDeptDetail(id), 80); return; }
+  if (type === 'project') {
+    const dept = state.departments.find(d => d.projects.some(p => p.id === id));
+    if (dept) { showView('departments'); setTimeout(() => showDeptDetail(dept.id), 80); }
+    return;
+  }
+  if (type === 'daily') { showView('daily'); return; }
+}
+
+// ── Tooltip ─────────────────────────────────────────────────
+function mmShowTooltip(e, type, id) {
+  const tooltip = document.getElementById('mm-tooltip');
+  if (!tooltip) return;
+  let content = '';
+  if (type === 'root') { content = '🌸 人生重启系统<br><span style="opacity:.7;font-size:11px;">点击查看概览</span>'; }
+  else if (type === 'dept') {
+    const dept = state.departments.find(d => d.id === id);
+    if (dept) content = `<strong>${dept.emoji} ${dept.name}</strong><br><span style="opacity:.8;font-size:11.5px;">${dept.meaning.substring(0,50)}…</span><br><span style="opacity:.6;font-size:11px;">点击查看详情</span>`;
+  } else if (type === 'project') {
+    const dept = state.departments.find(d => d.projects.some(p => p.id === id));
+    const proj = dept ? dept.projects.find(p => p.id === id) : null;
+    if (proj) {
+      const statusLabel = { active: '🔵 进行中', done: '✅ 已完成', planned: '🌱 计划中' }[proj.status];
+      content = `<strong>${proj.name}</strong> ${statusLabel}<br><span style="opacity:.8;font-size:11.5px;">${proj.desc.substring(0,60)}…</span>`;
+    }
+  } else if (type === 'daily') {
+    const block = state.schedule.flatMap(b => b.items.map(i => ({...i, period: b.period}))).find(i => i.id === id);
+    if (block) content = `<span style="opacity:.7;font-size:11px;">${block.period}</span><br><strong>${block.label || block.task}</strong>`;
+  }
+  if (!content) return;
+  tooltip.innerHTML = content;
+  tooltip.style.display = 'block';
+  const rect = document.getElementById('mm-wrap').getBoundingClientRect();
+  let tx = e.clientX - rect.left + 14;
+  let ty = e.clientY - rect.top - 10;
+  if (tx + 270 > rect.width) tx = e.clientX - rect.left - 270;
+  tooltip.style.left = tx + 'px';
+  tooltip.style.top  = ty + 'px';
+}
+
+function mmHideTooltip() {
+  const t = document.getElementById('mm-tooltip');
+  if (t) t.style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+
+renderOverview();
+</script>
+
+<script>
+// ── Service Worker Registration ─────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(reg => {
+        console.log('[PWA] SW registered:', reg.scope);
+        // Check for updates every time app opens
+        reg.update();
+      })
+      .catch(err => console.warn('[PWA] SW registration failed:', err));
+  });
+}
+// ── iOS PWA install prompt helper ──────────────────────
+window.addEventListener('load', () => {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  const dismissed = localStorage.getItem('pwa_install_dismissed');
+  if (isIOS && !isStandalone && !dismissed) {
+    const banner = document.createElement('div');
+    banner.id = 'pwa-banner';
+    banner.innerHTML = `
+      <div style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#fff;border-top:1px solid #D9D0C4;padding:14px 20px 28px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.12);">
+        <div style="font-size:32px;flex-shrink:0;">🌸</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:14px;color:#2D2520;margin-bottom:3px;">添加到主屏幕，像 App 一样使用</div>
+          <div style="font-size:12.5px;color:#9A8F88;line-height:1.6;">点击底部 <strong style="color:#4E7354;">分享按钮 ↑</strong> → 选择「添加到主屏幕」→ 点击「添加」</div>
+        </div>
+        <button onclick="this.closest('#pwa-banner').remove();localStorage.setItem('pwa_install_dismissed','1')" style="font-size:18px;background:none;border:none;cursor:pointer;color:#9A8F88;padding:4px;flex-shrink:0;">✕</button>
+      </div>`;
+    document.body.appendChild(banner);
+  }
+});
+</script>
+
+</body>
+</html>
