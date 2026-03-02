@@ -129,6 +129,84 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
 }
 .page-scroll::-webkit-scrollbar { display: none; }
 
+
+/* ═══════════════════════════════════════════════
+   AI COMPONENTS
+═══════════════════════════════════════════════ */
+.user-bubble {
+  max-width: 78%; margin: 6px 0 6px auto;
+  background: var(--green); color: #fff;
+  padding: 11px 15px; border-radius: 18px 18px 4px 18px;
+  font-size: 15px; line-height: 1.6;
+}
+.ai-bubble {
+  max-width: 88%; margin: 6px auto 6px 0;
+  background: #fff; color: var(--text);
+  padding: 12px 16px; border-radius: 18px 18px 18px 4px;
+  font-size: 15px; line-height: 1.7;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  white-space: pre-wrap; word-break: break-word;
+}
+.ai-bubble.error { background: var(--rose-bg); border-color: var(--rose); color: var(--rose); }
+.chat-date-divider {
+  text-align: center; font-size: 11.5px; color: var(--text-soft);
+  padding: 10px 0; letter-spacing: .3px;
+}
+.typing-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-soft); margin: 0 2px;
+  animation: typingBounce 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: .2s; }
+.typing-dot:nth-child(3) { animation-delay: .4s; }
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+.suggest-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 20px;
+  background: #fff; border: 1.5px solid var(--border);
+  font-size: 13px; font-weight: 500; color: var(--text-mid);
+  white-space: nowrap; cursor: pointer; flex-shrink: 0;
+  transition: all .15s; box-shadow: var(--shadow);
+}
+.suggest-chip:active { transform: scale(.95); opacity: .8; }
+.ai-proj-card {
+  background: #fff; border-radius: var(--radius);
+  border: 1.5px solid var(--border); padding: 16px;
+  margin: 6px 0; cursor: pointer;
+  transition: all .15s;
+}
+.ai-proj-card:active { transform: scale(.98); }
+.ai-proj-card-dept { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 4px; }
+.ai-proj-card-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.ai-proj-card-desc { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+.ai-proj-card-add { margin-top: 10px; display: flex; justify-content: flex-end; }
+.ai-loading-bar {
+  height: 2px; background: linear-gradient(90deg, var(--green), var(--teal), var(--purple));
+  background-size: 200% 100%; border-radius: 1px;
+  animation: loadingSlide 1.5s ease-in-out infinite;
+}
+@keyframes loadingSlide {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+.api-key-status { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+
+/* AI buttons in sheets */
+.ai-gen-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 11px 14px; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #3A6B42, #2E6B7F);
+  color: #fff; font-size: 14px; font-weight: 600; width: 100%;
+  justify-content: center; margin-bottom: 12px;
+  transition: all .15s;
+}
+.ai-gen-btn:active { opacity: .85; transform: scale(.98); }
+.ai-gen-btn.loading { opacity: .7; pointer-events: none; }
+
 /* ═══════════════════════════════════════════════
    BOTTOM TAB BAR
 ═══════════════════════════════════════════════ */
@@ -815,6 +893,41 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
       </div>
     </div>
 
+
+    <!-- ═══ AI PAGE ══════════════════════════════ -->
+    <div class="page" id="page-ai">
+      <div class="page-header">
+        <div>
+          <div class="page-title">AI 顾问</div>
+          <div class="page-subtitle" id="ai-status-label">你的专属健康顾问</div>
+        </div>
+        <button class="header-btn" onclick="openSheet('sheet-apikey')" title="API 设置" id="ai-key-btn" style="font-size:13px;">⚙️</button>
+      </div>
+      <!-- Chat area -->
+      <div id="chat-scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px;overscroll-behavior:contain;">
+        <div id="chat-messages"></div>
+        <div id="chat-typing" style="display:none;padding:10px 0;">
+          <div class="ai-bubble">
+            <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+          </div>
+        </div>
+      </div>
+      <!-- Suggestions strip -->
+      <div id="ai-suggestions" style="padding:8px 16px 6px;border-top:1px solid var(--border);overflow-x:auto;white-space:nowrap;display:flex;gap:8px;-webkit-overflow-scrolling:touch;flex-shrink:0;">
+        <button class="suggest-chip" onclick="aiSuggestProjects()">💡 建议新项目</button>
+        <button class="suggest-chip" onclick="aiWeekSummary()">📊 本周总结</button>
+        <button class="suggest-chip" onclick="aiMotivate()">🌸 今日鼓励</button>
+        <button class="suggest-chip" onclick="aiCheckIn()">✅ 打卡分析</button>
+      </div>
+      <!-- Input bar -->
+      <div id="chat-input-bar" style="padding:10px 16px;padding-bottom:max(10px, calc(var(--safe-bot) + 2px));border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end;flex-shrink:0;background:var(--cream);">
+        <textarea id="chat-input" placeholder="问我任何关于健康、计划、情绪的问题…" style="flex:1;border:1.5px solid var(--border);border-radius:20px;padding:10px 16px;font-size:15px;background:#fff;outline:none;resize:none;max-height:100px;line-height:1.5;overflow-y:auto;" rows="1" oninput="autoResize(this)" onkeydown="chatKeydown(event)"></textarea>
+        <button id="chat-send-btn" onclick="sendChat()" style="width:42px;height:42px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+
   </div><!-- /pages -->
 
   <!-- Bottom Tab Bar -->
@@ -834,6 +947,11 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
     <div class="tab-item" onclick="switchTab('vision')" id="tab-vision">
       <div class="tab-icon">✨</div>
       <div class="tab-label">愿景</div>
+    </div>
+    <div class="tab-item" onclick="switchTab('ai')" id="tab-ai">
+      <div class="tab-icon">🤖</div>
+      <div class="tab-label">AI</div>
+      <div class="tab-dot" id="tab-ai-dot"></div>
     </div>
   </div>
 </div>
@@ -874,8 +992,11 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
   <div class="sheet-body">
     <input type="hidden" id="proj-dept-id">
     <input type="hidden" id="proj-proj-id">
+    <button class="ai-gen-btn" id="proj-ai-btn" onclick="aiGenerateProject()">
+      🤖 AI 帮我写项目详情
+    </button>
     <div class="form-group">
-      <label class="form-label">项目名称</label>
+      <label class="form-label">项目名称（或简单描述你的想法）</label>
       <input class="form-input" id="proj-name" placeholder="例：478呼吸法练习计划">
     </div>
     <div class="form-group">
@@ -966,6 +1087,9 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
   </div>
   <div class="sheet-body">
     <input type="hidden" id="modedit-proj-id">
+    <button class="ai-gen-btn" id="mod-ai-btn" onclick="aiGenerateModule()">
+      🤖 AI 帮我生成实践步骤
+    </button>
     <div style="font-size:12.5px;color:var(--text-soft);margin-bottom:14px;padding:10px 13px;background:var(--teal-bg);border-radius:var(--radius-sm);line-height:1.7;">
       💡 每日实践模块是项目落实到每天的操作指南，可在今日页随时查阅。
     </div>
@@ -1051,6 +1175,50 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ═══ SHEET: API Key Setup ═══ -->
+<div class="sheet-overlay" id="overlay-apikey" onclick="closeSheet('sheet-apikey')"></div>
+<div class="sheet" id="sheet-apikey">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">⚙️ AI 设置</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-apikey')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div style="background:var(--green-bg);border-radius:var(--radius-sm);padding:13px 15px;margin-bottom:18px;font-size:13.5px;color:var(--text-mid);line-height:1.7;">
+      🔒 API Key 仅存储在你的手机本地（IndexedDB），不会上传到任何地方。
+      前往 <strong>console.anthropic.com</strong> 免费注册获取 Key，新用户有免费额度。
+    </div>
+    <div class="form-group">
+      <label class="form-label">Anthropic API Key</label>
+      <input class="form-input" id="api-key-input" type="password" placeholder="sk-ant-api03-…" autocomplete="off">
+      <div class="api-key-status" id="api-key-status"></div>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="closeSheet('sheet-apikey')">取消</button>
+    <button class="btn-primary" onclick="saveApiKey()">保存</button>
+  </div>
+</div>
+
+<!-- ═══ SHEET: AI Project Suggestions ═══ -->
+<div class="sheet-overlay" id="overlay-aiprojs" onclick="closeSheet('sheet-aiprojs')"></div>
+<div class="sheet" id="sheet-aiprojs" style="max-height:90vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">💡 AI 建议的新项目</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-aiprojs')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div style="font-size:13.5px;color:var(--text-soft);margin-bottom:14px;line-height:1.6;">根据你现有的系统分析，以下是 AI 建议可以尝试的新项目。点击「添加到系统」一键加入对应部门。</div>
+    <div id="ai-proj-suggestions-list"></div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-primary" onclick="closeSheet('sheet-aiprojs')">完成</button>
+  </div>
+</div>
+
+
 
 <!-- iOS install banner -->
 <div id="install-banner" class="hidden">
@@ -1981,12 +2149,458 @@ if (isIOS && !isStandalone && !localStorage.getItem('pwa_shown')) {
   document.getElementById('install-banner').classList.remove('hidden');
 }
 
-// Boot
+// Boot handled by AI engine below
+
+// ═══════════════════════════════════════════════════════
+// AI ENGINE
+// ═══════════════════════════════════════════════════════
+
+let chatHistory = [];
+let aiTyping = false;
+let currentModProjIdForAI = null; // track for module generation
+
+// ── API Key management ──────────────────────────────────
+async function loadApiKey() {
+  const key = await dbGet('apiKey').catch(() => null);
+  const btn = document.getElementById('ai-key-btn');
+  const label = document.getElementById('ai-status-label');
+  if (key) {
+    btn.textContent = '✅';
+    if (label) label.textContent = 'API 已连接 · 专属健康顾问';
+  } else {
+    btn.textContent = '⚙️';
+    if (label) label.textContent = '点击右上角设置 API Key';
+  }
+  return key;
+}
+
+async function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val) { showToast('请输入 API Key'); return; }
+  if (!val.startsWith('sk-ant')) { 
+    document.getElementById('api-key-status').innerHTML = '<span style="color:var(--rose);">⚠️ Key 格式不对，应以 sk-ant 开头</span>';
+    return; 
+  }
+  await dbSet('apiKey', val);
+  closeSheet('sheet-apikey');
+  loadApiKey();
+  showToast('API Key 已保存 🔒');
+  if (currentTab === 'ai' && chatHistory.length === 0) initChat();
+}
+
+async function openApiKeySheet() {
+  const existing = await dbGet('apiKey').catch(() => null);
+  const input = document.getElementById('api-key-input');
+  input.value = existing ? '••••••••••••' + existing.slice(-4) : '';
+  document.getElementById('api-key-status').innerHTML = existing 
+    ? '<span style="color:var(--green);">✅ 已保存</span>' 
+    : '<span style="color:var(--text-soft);">未设置</span>';
+  openSheet('sheet-apikey');
+}
+
+// Override the header button to use openApiKeySheet
+document.getElementById('ai-key-btn').onclick = openApiKeySheet;
+
+// ── Core API call ───────────────────────────────────────
+async function callClaude(messages, systemPrompt = '', maxTokens = 1200) {
+  const key = await dbGet('apiKey').catch(() => null);
+  if (!key) {
+    openApiKeySheet();
+    throw new Error('需要设置 API Key');
+  }
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages
+    })
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content[0].text;
+}
+
+// ── System context builder ──────────────────────────────
+function buildSystemContext() {
+  const depts = state.departments.map(d => {
+    const active = d.projects.filter(p=>p.status==='active').map(p=>p.name);
+    const planned = d.projects.filter(p=>p.status==='planned').map(p=>p.name);
+    const done = d.projects.filter(p=>p.status==='done').map(p=>p.name);
+    return `【${d.emoji} ${d.name}】
+- 进行中：${active.join('、') || '无'}
+- 计划中：${planned.join('、') || '无'}
+- 已完成：${done.join('、') || '无'}`;
+  }).join('
+
+');
+
+  const allItems = state.schedule.flatMap(b => b.items);
+  const checkedToday = allItems.filter(i=>i.checked).length;
+  const totalToday = allItems.length;
+
+  return `你是一位温柔、专业的健康恢复顾问，专门帮助乳腺癌康复期患者。你了解这位用户的完整健康管理系统：
+
+用户的愿景：${state.vision.abstract?.split('
+')[0] || ''}
+
+【四大部门现状】
+${depts}
+
+【今日打卡状态】${checkedToday}/${totalToday} 项已完成
+
+使用原则：
+- 用温柔、支持性的语气，像贴心朋友一样交流
+- 回复要简洁、有实用价值，不要过长
+- 回复使用中文，适当使用emoji增加温暖感
+- 永远不要给出明确的医疗诊断或治疗建议，建议咨询医生
+- 鼓励小的进步，不要批评或施加压力`;
+}
+
+// ── Chat UI ─────────────────────────────────────────────
+function renderChatTab() {
+  loadApiKey().then(key => {
+    if (!key && chatHistory.length === 0) {
+      appendSystemMsg('你好 🌸 欢迎使用 AI 顾问！
+
+请先点击右上角 ⚙️ 设置你的 Anthropic API Key，就可以开始和我聊天了。
+
+💡 去 console.anthropic.com 免费注册获取 Key，新用户有免费额度。');
+    } else if (chatHistory.length === 0) {
+      initChat();
+    }
+  });
+}
+
+function initChat() {
+  const now = new Date();
+  const h = now.getHours();
+  const greeting = h < 6 ? '深夜好' : h < 10 ? '早安' : h < 14 ? '你好' : h < 18 ? '下午好' : '晚上好';
+  const checkedToday = state.schedule.flatMap(b=>b.items).filter(i=>i.checked).length;
+  const totalToday = state.schedule.flatMap(b=>b.items).length;
+  const intro = `${greeting} 🌸 我是你的专属健康顾问，了解你完整的人生重启系统。
+
+今日你已完成 ${checkedToday}/${totalToday} 项打卡任务。
+
+你可以问我任何关于健康、情绪、计划的问题，或者用下方的快捷按钮开始。`;
+  appendSystemMsg(intro);
+}
+
+function appendSystemMsg(text) {
+  const c = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-bubble';
+  div.textContent = text;
+  c.appendChild(div);
+  scrollChatBottom();
+}
+
+function appendUserMsg(text) {
+  const c = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'user-bubble';
+  div.textContent = text;
+  c.appendChild(div);
+  scrollChatBottom();
+}
+
+function appendAiMsg(text, isError = false) {
+  document.getElementById('chat-typing').style.display = 'none';
+  const c = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-bubble' + (isError ? ' error' : '');
+  div.textContent = text;
+  c.appendChild(div);
+  scrollChatBottom();
+  return div;
+}
+
+function scrollChatBottom() {
+  const s = document.getElementById('chat-scroll');
+  setTimeout(() => { s.scrollTop = s.scrollHeight; }, 60);
+}
+
+function showTyping() {
+  document.getElementById('chat-typing').style.display = 'block';
+  scrollChatBottom();
+}
+
+async function sendChat() {
+  if (aiTyping) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = ''; autoResize(input);
+
+  appendUserMsg(text);
+  chatHistory.push({ role: 'user', content: text });
+  showTyping();
+  aiTyping = true;
+  document.getElementById('chat-send-btn').style.opacity = '0.5';
+
+  try {
+    const reply = await callClaude(
+      chatHistory.slice(-12), // keep last 12 messages for context
+      buildSystemContext(),
+      1200
+    );
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendAiMsg(reply);
+  } catch (e) {
+    appendAiMsg('出了点问题：' + e.message, true);
+  } finally {
+    aiTyping = false;
+    document.getElementById('chat-send-btn').style.opacity = '1';
+  }
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ── Quick action chips ──────────────────────────────────
+async function aiMotivate() {
+  if (aiTyping) return;
+  const prompt = '根据我今天的打卡情况，给我一段温柔的鼓励（100字以内）。要真诚、有温度，不要太套路。';
+  chatHistory.push({ role: 'user', content: prompt });
+  appendUserMsg('🌸 今日鼓励');
+  showTyping(); aiTyping = true;
+  try {
+    const reply = await callClaude(chatHistory.slice(-8), buildSystemContext(), 400);
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendAiMsg(reply);
+  } catch(e) { appendAiMsg('出了点问题：' + e.message, true); }
+  finally { aiTyping = false; }
+}
+
+async function aiCheckIn() {
+  if (aiTyping) return;
+  const allItems = state.schedule.flatMap(b => b.items);
+  const done = allItems.filter(i=>i.checked).map(i=>i.task);
+  const pending = allItems.filter(i=>!i.checked).map(i=>i.task);
+  const prompt = `今天我完成了：${done.slice(0,5).join('、') || '还没有打卡'}。还没完成的有：${pending.slice(0,5).join('、')}。根据这个情况给我一个简短的分析和建议（150字以内）。`;
+  chatHistory.push({ role: 'user', content: prompt });
+  appendUserMsg('✅ 打卡分析');
+  showTyping(); aiTyping = true;
+  try {
+    const reply = await callClaude(chatHistory.slice(-8), buildSystemContext(), 600);
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendAiMsg(reply);
+  } catch(e) { appendAiMsg('出了点问题：' + e.message, true); }
+  finally { aiTyping = false; }
+}
+
+async function aiWeekSummary() {
+  if (aiTyping) return;
+  appendUserMsg('📊 本周总结');
+  showTyping(); aiTyping = true;
+  const prompt = '根据我的系统现状，帮我生成一段简短的本周进展总结，并给出下周最重要的1-2个建议（200字以内）。';
+  chatHistory.push({ role: 'user', content: prompt });
+  try {
+    const reply = await callClaude(chatHistory.slice(-8), buildSystemContext(), 600);
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendAiMsg(reply);
+  } catch(e) { appendAiMsg('出了点问题：' + e.message, true); }
+  finally { aiTyping = false; }
+}
+
+// ── AI Project Suggestions ──────────────────────────────
+async function aiSuggestProjects() {
+  if (aiTyping) return;
+  appendUserMsg('💡 建议新项目');
+  showTyping(); aiTyping = true;
+  const prompt = `请根据我现有的系统，为每个部门各建议1个新项目（可以跳过已有类似项目的部门）。
+返回 JSON 格式，不要其他文字：
+[
+  {
+    "deptId": "dept1或dept2或dept3或dept4",
+    "name": "项目名称（10字以内）",
+    "desc": "项目描述（80字以内）",
+    "reason": "为什么建议这个（30字以内）"
+  }
+]`;
+  try {
+    const raw = await callClaude(
+      [{ role: 'user', content: prompt }],
+      buildSystemContext(),
+      800
+    );
+    document.getElementById('chat-typing').style.display = 'none';
+    // Parse JSON
+    const jsonMatch = raw.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('AI 返回格式有误，请重试');
+    const suggestions = JSON.parse(jsonMatch[0]);
+    chatHistory.push({ role: 'assistant', content: '我分析了你的系统，建议了一些新项目，请查看建议页。' });
+    appendAiMsg('我分析了你的系统，建议了 ' + suggestions.length + ' 个新项目，点下方卡片可以直接添加到系统 👇');
+    renderProjectSuggestions(suggestions);
+    openSheet('sheet-aiprojs');
+  } catch(e) {
+    appendAiMsg('出了点问题：' + e.message, true);
+  } finally {
+    aiTyping = false;
+  }
+}
+
+function renderProjectSuggestions(suggestions) {
+  const c = document.getElementById('ai-proj-suggestions-list');
+  c.innerHTML = '';
+  suggestions.forEach(s => {
+    const dept = state.departments.find(d => d.id === s.deptId) || state.departments[0];
+    const card = document.createElement('div');
+    card.className = 'ai-proj-card';
+    card.style.borderColor = dept.colorHex + '44';
+    card.innerHTML = `
+      <div class="ai-proj-card-dept" style="color:${dept.colorHex};">${dept.emoji} ${dept.name}</div>
+      <div class="ai-proj-card-name">${s.name}</div>
+      <div class="ai-proj-card-desc">${s.desc}</div>
+      <div style="font-size:12px;color:var(--text-soft);margin-top:6px;">💡 ${s.reason}</div>
+      <div class="ai-proj-card-add">
+        <button onclick="addSuggestedProject('${dept.id}','${s.name.replace(/'/g, "\'")}','${s.desc.replace(/'/g, "\'")}', this)"
+          style="background:${dept.colorHex};color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;transition:all .15s;">
+          添加到系统
+        </button>
+      </div>`;
+    c.appendChild(card);
+  });
+}
+
+function addSuggestedProject(deptId, name, desc, btn) {
+  const dept = state.departments.find(d => d.id === deptId);
+  if (!dept) return;
+  dept.projects.push({ id: uid(), name, status: 'planned', desc });
+  persist();
+  btn.textContent = '✅ 已添加';
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  showToast(name + ' 已添加到 ' + dept.name);
+  if (currentDeptId === deptId) renderDeptDetail(dept);
+}
+
+// ── AI generate project details ─────────────────────────
+async function aiGenerateProject() {
+  const btn = document.getElementById('proj-ai-btn');
+  const name = document.getElementById('proj-name').value.trim();
+  if (!name) { showToast('请先输入项目名称或简单描述你的想法'); return; }
+
+  btn.classList.add('loading');
+  btn.textContent = '⏳ AI 生成中…';
+
+  const deptId = document.getElementById('proj-dept-id').value;
+  const dept = state.departments.find(d => d.id === deptId);
+
+  try {
+    const prompt = `用户想在「${dept?.name || ''}」部门添加一个项目，她的想法是："${name}"。
+
+请生成完整的项目信息，返回 JSON 格式，不要其他文字：
+{
+  "name": "完整的项目名称（15字以内）",
+  "desc": "项目描述（120字以内，包含：这个项目做什么、有什么作用、预期收获）"
+}`;
+
+    const raw = await callClaude([{ role:'user', content: prompt }], buildSystemContext(), 400);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('格式有误');
+    const result = JSON.parse(jsonMatch[0]);
+    document.getElementById('proj-name').value = result.name;
+    document.getElementById('proj-desc').value = result.desc;
+    showToast('✨ AI 已生成项目详情');
+  } catch(e) {
+    showToast('生成失败：' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '🤖 AI 帮我写项目详情';
+  }
+}
+
+// ── AI generate daily module ────────────────────────────
+async function aiGenerateModule() {
+  const btn = document.getElementById('mod-ai-btn');
+  const projId = document.getElementById('modedit-proj-id').value;
+  const found = findProject(projId);
+  if (!found) { showToast('找不到项目信息'); return; }
+
+  btn.classList.add('loading');
+  btn.textContent = '⏳ AI 生成中…';
+
+  const { proj, dept } = found;
+  try {
+    const prompt = `用户有一个健康管理项目：「${proj.name}」
+项目描述：${proj.desc}
+所属部门：${dept.name}（${dept.meaning}）
+
+请生成这个项目的每日实践模块，返回 JSON 格式，不要其他文字：
+{
+  "title": "模块标题（带emoji，20字以内）",
+  "frequency": "执行频率描述（如：每天2次 · 起床后 & 睡前）",
+  "steps": [
+    {"icon": "emoji", "label": "步骤标签（5字以内）", "text": "详细说明（50字以内）"}
+  ],
+  "notes": "温馨提示（60字以内，用温柔鼓励的语气）"
+}
+steps 3-6个，实用且具体。`;
+
+    const raw = await callClaude([{ role:'user', content: prompt }], buildSystemContext(), 800);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('格式有误');
+    const mod = JSON.parse(jsonMatch[0]);
+
+    document.getElementById('modedit-title').value = mod.title || '';
+    document.getElementById('modedit-freq').value = mod.frequency || '';
+    document.getElementById('modedit-notes').value = mod.notes || '';
+    document.getElementById('modedit-steps').value = (mod.steps || []).map(s => `${s.icon} ${s.label} | ${s.text}`).join('
+');
+    showToast('✨ AI 已生成实践步骤');
+  } catch(e) {
+    showToast('生成失败：' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '🤖 AI 帮我生成实践步骤';
+  }
+}
+
+// ── Patch switchTab to handle 'ai' ──────────────────────
+const _origSwitchTab = switchTab;
+function switchTab(tab) {
+  if (currentTab === tab) return;
+  currentTab = tab;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'today') renderToday();
+  if (tab === 'system') renderDeptList();
+  if (tab === 'map') setTimeout(renderMap, 80);
+  if (tab === 'vision') renderVision();
+  if (tab === 'ai') renderChatTab();
+}
+
+// ── Patch openDB boot to also load API key ──────────────
+const _origBoot = openDB;
+// After state loads, initialize AI key status
+document.addEventListener('DOMContentLoaded', () => {});
+// We'll call loadApiKey after the main boot
 openDB().then(loadState).then(() => {
   renderToday();
   renderDeptList();
   renderVision();
-});
+  loadApiKey();
+}).catch(console.error);
+
 </script>
 </body>
 </html>
