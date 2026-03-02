@@ -1,0 +1,2606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>人生重启系统 2.0</title>
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="人生重启">
+<meta name="theme-color" content="#2E5E3A">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════ */
+:root {
+  --cream:      #FAF7F2;
+  --paper:      #F3EEE6;
+  --warm:       #E8DFD0;
+  --border:     #D8CFBF;
+  --text:       #1C1814;
+  --text-mid:   #5A4F45;
+  --text-soft:  #9A8E84;
+  --green:      #3A6B42;
+  --green-l:    #5A8F63;
+  --green-bg:   #EAF3EB;
+  --teal:       #2E6B7F;
+  --teal-bg:    #E4F1F5;
+  --rose:       #8E3A52;
+  --rose-bg:    #F5E8ED;
+  --amber:      #9A5E1E;
+  --amber-bg:   #F8EDDA;
+  --purple:     #5C4A8A;
+  --purple-bg:  #EDE9F6;
+  --safe-top:   env(safe-area-inset-top, 0px);
+  --safe-bot:   env(safe-area-inset-bottom, 0px);
+  --safe-left:  env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --tab-h:      68px;
+  --radius:     16px;
+  --radius-sm:  10px;
+  --shadow:     0 2px 16px rgba(28,24,20,.09);
+  --shadow-md:  0 6px 28px rgba(28,24,20,.14);
+  --shadow-lg:  0 16px 48px rgba(28,24,20,.18);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Noto Sans SC', -apple-system, sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS zoom */ }
+
+/* ═══════════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════════ */
+#app {
+  display: flex; flex-direction: column;
+  height: 100%; width: 100%;
+  position: fixed; inset: 0;
+}
+
+/* Status bar spacer */
+#status-bar {
+  height: var(--safe-top);
+  background: var(--cream);
+  flex-shrink: 0;
+  transition: background .3s;
+}
+
+/* Page container */
+#pages {
+  flex: 1; overflow: hidden;
+  position: relative;
+}
+
+/* Each page */
+.page {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity .22s ease, transform .22s ease;
+}
+.page.active {
+  opacity: 1; pointer-events: all;
+  transform: translateY(0);
+}
+
+/* Page header */
+.page-header {
+  padding: 14px 20px 12px;
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px;
+}
+.page-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 24px; font-weight: 700;
+  color: var(--text); flex: 1;
+}
+.page-subtitle {
+  font-size: 13px; color: var(--text-soft); margin-top: 1px;
+}
+.header-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--paper); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--text-mid);
+  transition: all .15s;
+}
+.header-btn:active { transform: scale(.94); }
+
+/* Scrollable content area */
+.page-scroll {
+  flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px 20px;
+  overscroll-behavior: contain;
+}
+.page-scroll::-webkit-scrollbar { display: none; }
+
+
+/* ═══════════════════════════════════════════════
+   AI COMPONENTS
+═══════════════════════════════════════════════ */
+.user-bubble {
+  max-width: 78%; margin: 6px 0 6px auto;
+  background: var(--green); color: #fff;
+  padding: 11px 15px; border-radius: 18px 18px 4px 18px;
+  font-size: 15px; line-height: 1.6;
+}
+.ai-bubble {
+  max-width: 88%; margin: 6px auto 6px 0;
+  background: #fff; color: var(--text);
+  padding: 12px 16px; border-radius: 18px 18px 18px 4px;
+  font-size: 15px; line-height: 1.7;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  white-space: pre-wrap; word-break: break-word;
+}
+.ai-bubble.error { background: var(--rose-bg); border-color: var(--rose); color: var(--rose); }
+.chat-date-divider {
+  text-align: center; font-size: 11.5px; color: var(--text-soft);
+  padding: 10px 0; letter-spacing: .3px;
+}
+.typing-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-soft); margin: 0 2px;
+  animation: typingBounce 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: .2s; }
+.typing-dot:nth-child(3) { animation-delay: .4s; }
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+.suggest-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 20px;
+  background: #fff; border: 1.5px solid var(--border);
+  font-size: 13px; font-weight: 500; color: var(--text-mid);
+  white-space: nowrap; cursor: pointer; flex-shrink: 0;
+  transition: all .15s; box-shadow: var(--shadow);
+}
+.suggest-chip:active { transform: scale(.95); opacity: .8; }
+.ai-proj-card {
+  background: #fff; border-radius: var(--radius);
+  border: 1.5px solid var(--border); padding: 16px;
+  margin: 6px 0; cursor: pointer;
+  transition: all .15s;
+}
+.ai-proj-card:active { transform: scale(.98); }
+.ai-proj-card-dept { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 4px; }
+.ai-proj-card-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.ai-proj-card-desc { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+.ai-proj-card-add { margin-top: 10px; display: flex; justify-content: flex-end; }
+.ai-loading-bar {
+  height: 2px; background: linear-gradient(90deg, var(--green), var(--teal), var(--purple));
+  background-size: 200% 100%; border-radius: 1px;
+  animation: loadingSlide 1.5s ease-in-out infinite;
+}
+@keyframes loadingSlide {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+.api-key-status { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+
+/* AI buttons in sheets */
+.ai-gen-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 11px 14px; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #3A6B42, #2E6B7F);
+  color: #fff; font-size: 14px; font-weight: 600; width: 100%;
+  justify-content: center; margin-bottom: 12px;
+  transition: all .15s;
+}
+.ai-gen-btn:active { opacity: .85; transform: scale(.98); }
+.ai-gen-btn.loading { opacity: .7; pointer-events: none; }
+
+/* ═══════════════════════════════════════════════
+   BOTTOM TAB BAR
+═══════════════════════════════════════════════ */
+#tab-bar {
+  flex-shrink: 0;
+  background: rgba(250,247,242,.96);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: var(--safe-bot);
+  height: calc(var(--tab-h) + var(--safe-bot));
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; padding-top: 6px;
+  color: var(--text-soft);
+  transition: color .2s;
+  position: relative;
+}
+.tab-item.active { color: var(--green); }
+.tab-icon {
+  font-size: 22px; line-height: 1;
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+}
+.tab-item.active .tab-icon { transform: scale(1.12); }
+.tab-label {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: .2px;
+}
+.tab-dot {
+  position: absolute; top: 4px; right: calc(50% - 14px);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--rose); border: 1.5px solid var(--cream);
+  opacity: 0; transition: opacity .2s;
+}
+.tab-dot.show { opacity: 1; }
+
+/* ═══════════════════════════════════════════════
+   CARDS & SECTIONS
+═══════════════════════════════════════════════ */
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card + .card, .card + .section-gap { margin-top: 12px; }
+.section-gap { margin-top: 22px; }
+.section-label {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-soft); margin-bottom: 8px;
+  padding-left: 4px;
+}
+.row {
+  display: flex; align-items: center;
+  padding: 13px 16px; gap: 12px;
+}
+.row + .row { border-top: 1px solid var(--warm); }
+.row-icon { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; }
+.row-body { flex: 1; min-width: 0; }
+.row-title { font-size: 15px; font-weight: 500; color: var(--text); }
+.row-sub { font-size: 12.5px; color: var(--text-soft); margin-top: 1px; }
+.row-right { flex-shrink: 0; color: var(--text-soft); font-size: 13px; }
+.row-arrow { color: var(--border); font-size: 16px; margin-left: 4px; }
+
+/* ═══════════════════════════════════════════════
+   TODAY TAB
+═══════════════════════════════════════════════ */
+.today-hero {
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #3A6B42 0%, #2E547A 100%);
+  border-radius: var(--radius); padding: 22px 20px;
+  position: relative; overflow: hidden;
+}
+.today-hero::before {
+  content: '🌸';
+  position: absolute; right: 16px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 64px; opacity: .15;
+}
+.today-date { font-size: 12.5px; color: rgba(255,255,255,.65); margin-bottom: 4px; }
+.today-greeting {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 20px; font-weight: 700; color: #fff;
+  margin-bottom: 14px; line-height: 1.4;
+}
+.progress-row { display: flex; align-items: center; gap: 12px; }
+.progress-ring-wrap { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
+.progress-ring-wrap svg { transform: rotate(-90deg); }
+.progress-pct {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+}
+.progress-info { color: rgba(255,255,255,.85); font-size: 13px; }
+.progress-info strong { color: #fff; font-size: 15px; }
+
+/* Task list */
+.task-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px;
+}
+.task-item + .task-item { border-top: 1px solid var(--warm); }
+.task-check {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s cubic-bezier(.34,1.56,.64,1);
+  cursor: pointer;
+}
+.task-check.done {
+  background: var(--green); border-color: var(--green);
+}
+.task-check.done::after { content: '✓'; color: #fff; font-size: 13px; font-weight: 700; }
+.task-body { flex: 1; min-width: 0; }
+.task-title {
+  font-size: 15px; color: var(--text);
+  transition: all .2s;
+}
+.task-title.done { text-decoration: line-through; color: var(--text-soft); }
+.task-meta { font-size: 12px; color: var(--text-soft); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+.task-time { color: var(--text-soft); }
+.task-module-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11.5px; font-weight: 600;
+  padding: 2px 8px; border-radius: 8px;
+  border: 1.5px solid; cursor: pointer;
+  transition: all .15s;
+}
+.task-module-btn:active { opacity: .75; }
+.block-header {
+  padding: 10px 16px 6px;
+  background: var(--paper);
+  display: flex; align-items: center; gap: 8px;
+}
+.block-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.block-label { font-size: 12px; font-weight: 700; color: var(--text-mid); }
+.block-time { font-size: 11.5px; color: var(--text-soft); margin-left: auto; }
+
+/* Reflection */
+.reflect-field {
+  padding: 12px 16px;
+}
+.reflect-field + .reflect-field { border-top: 1px solid var(--warm); }
+.reflect-label { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+.reflect-input {
+  width: 100%; border: none; outline: none;
+  background: transparent;
+  font-size: 15px; color: var(--text);
+  resize: none; line-height: 1.6;
+  min-height: 60px;
+}
+
+/* Min version */
+.min-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+}
+.min-item + .min-item { border-top: 1px solid var(--warm); }
+.min-icon { font-size: 22px; flex-shrink: 0; }
+.min-text { font-size: 14px; color: var(--text-mid); }
+.min-check {
+  margin-left: auto; width: 22px; height: 22px;
+  border-radius: 50%; border: 2px solid var(--border);
+  flex-shrink: 0; cursor: pointer;
+  transition: all .2s cubic-bezier(.34,1.56,.64,1);
+  display: flex; align-items: center; justify-content: center;
+}
+.min-check.done { background: var(--green); border-color: var(--green); }
+.min-check.done::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700; }
+
+/* ═══════════════════════════════════════════════
+   SYSTEM TAB (Departments)
+═══════════════════════════════════════════════ */
+.dept-card {
+  background: #fff; border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden; margin-bottom: 12px;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.dept-card:active { transform: scale(.985); box-shadow: none; }
+.dept-header {
+  padding: 16px 16px 12px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.dept-emoji { font-size: 30px; line-height: 1; margin-top: 2px; flex-shrink: 0; }
+.dept-info { flex: 1; min-width: 0; }
+.dept-name {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 16px; font-weight: 700; margin-bottom: 3px;
+}
+.dept-meaning { font-size: 12.5px; color: var(--text-soft); line-height: 1.5; }
+.dept-stats {
+  padding: 10px 16px 14px;
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.stat-pill {
+  font-size: 11.5px; font-weight: 600;
+  padding: 3px 10px; border-radius: 20px;
+}
+.dept-progress { padding: 0 16px 14px; }
+.dept-prog-bar { height: 4px; border-radius: 2px; background: var(--warm); }
+.dept-prog-fill { height: 4px; border-radius: 2px; transition: width .4s; }
+
+/* Department detail */
+.detail-header {
+  padding: 16px 20px 12px;
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.back-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--paper); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--text-mid); flex-shrink: 0;
+  cursor: pointer;
+}
+.back-btn:active { opacity: .7; }
+.detail-title-wrap { flex: 1; min-width: 0; }
+.detail-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 18px; font-weight: 700;
+}
+.detail-sub { font-size: 12px; color: var(--text-soft); }
+
+/* Project items in system */
+.proj-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.proj-item:active { background: var(--cream); }
+.proj-item + .proj-item { border-top: 1px solid var(--warm); }
+.proj-status-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 4px;
+}
+.proj-body { flex: 1; min-width: 0; }
+.proj-name { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+.proj-desc { font-size: 12.5px; color: var(--text-soft); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.proj-module-badge {
+  margin-top: 6px;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11.5px; font-weight: 600; padding: 3px 9px;
+  border-radius: 8px; color: #fff;
+}
+
+/* Goals chips */
+.goals-row { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; }
+.goal-item { border-radius: var(--radius-sm); padding: 12px 14px; }
+.goal-tag { font-size: 11px; font-weight: 700; letter-spacing: .5px; margin-bottom: 4px; }
+.goal-text { font-size: 13.5px; color: var(--text-mid); line-height: 1.65; }
+
+/* ═══════════════════════════════════════════════
+   MAP TAB (Mindmap) - simplified for mobile
+═══════════════════════════════════════════════ */
+#map-svg-wrap {
+  flex: 1; overflow: hidden; position: relative;
+  background-color: #F5F1EC;
+  background-image: radial-gradient(circle, #D8CFBF 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+#map-svg { width: 100%; height: 100%; touch-action: none; }
+.map-controls {
+  position: absolute; top: 12px; right: 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  z-index: 10;
+}
+.map-btn {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: rgba(250,247,242,.95);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: var(--text-mid);
+  cursor: pointer;
+}
+.map-btn:active { transform: scale(.92); }
+
+/* ═══════════════════════════════════════════════
+   VISION TAB
+═══════════════════════════════════════════════ */
+.vision-card {
+  background: #fff; border-radius: var(--radius);
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+  overflow: hidden; margin-bottom: 12px;
+}
+.vision-card-header {
+  padding: 14px 16px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.vision-card-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 15px; font-weight: 700; color: var(--text);
+}
+.vision-card-body {
+  padding: 0 16px 16px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 14.5px; color: var(--text-mid);
+  line-height: 2; white-space: pre-wrap;
+}
+.vision-card-body.empty { color: var(--text-soft); font-style: italic; font-family: inherit; }
+.edit-btn-sm {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--paper); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; cursor: pointer;
+}
+.edit-btn-sm:active { opacity: .7; }
+
+/* ═══════════════════════════════════════════════
+   SHEETS (bottom slide-up modals)
+═══════════════════════════════════════════════ */
+.sheet-overlay {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(28,24,20,.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .28s;
+}
+.sheet-overlay.open { opacity: 1; pointer-events: all; }
+
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 401;
+  background: var(--cream);
+  border-radius: 22px 22px 0 0;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(100%);
+  transition: transform .32s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
+  max-height: 92vh;
+  padding-bottom: var(--safe-bot);
+}
+.sheet.open { transform: translateY(0); }
+.sheet-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--border); margin: 10px auto 0;
+  flex-shrink: 0;
+}
+.sheet-header {
+  padding: 14px 20px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; border-bottom: 1px solid var(--border);
+}
+.sheet-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 17px; font-weight: 700;
+}
+.sheet-close {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--paper); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; cursor: pointer;
+}
+.sheet-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 20px; }
+.sheet-body::-webkit-scrollbar { display: none; }
+.sheet-footer {
+  padding: 12px 20px; border-top: 1px solid var(--border);
+  display: flex; gap: 10px; flex-shrink: 0;
+}
+
+/* Form elements */
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block; font-size: 12.5px; font-weight: 700;
+  color: var(--text-soft); margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: .3px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 13px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff; color: var(--text);
+  font-size: 16px; outline: none;
+  transition: border-color .15s;
+  -webkit-appearance: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--green);
+}
+.form-textarea { resize: vertical; line-height: 1.6; min-height: 90px; }
+.form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A4F45' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 38px;
+}
+.btn-primary {
+  flex: 1; padding: 14px;
+  background: var(--green); color: #fff;
+  border-radius: var(--radius-sm);
+  font-size: 15px; font-weight: 600;
+  transition: all .15s;
+}
+.btn-primary:active { transform: scale(.97); opacity: .9; }
+.btn-secondary {
+  flex: 1; padding: 14px;
+  background: var(--paper); color: var(--text-mid);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  transition: all .15s;
+}
+.btn-secondary:active { opacity: .7; }
+
+/* Module detail sheet */
+.module-step-item {
+  display: flex; gap: 12px; padding: 14px 0;
+  border-bottom: 1px solid var(--warm);
+}
+.module-step-item:last-child { border-bottom: none; }
+.module-step-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.module-step-label { font-size: 12px; font-weight: 700; color: var(--text-soft); margin-bottom: 4px; }
+.module-step-text { font-size: 14px; color: var(--text-mid); line-height: 1.65; }
+.module-notes-box {
+  margin-top: 14px; padding: 14px;
+  background: var(--amber-bg); border-radius: var(--radius-sm);
+  border-left: 3px solid var(--amber);
+  font-size: 13.5px; color: var(--text-mid); line-height: 1.7;
+}
+
+/* Project detail sheet */
+.proj-detail-module {
+  padding: 14px 16px;
+  background: var(--cream); border-radius: var(--radius-sm);
+  border: 1.5px dashed var(--border); margin-top: 10px;
+  cursor: pointer; display: flex; align-items: center; gap: 10px;
+}
+.proj-detail-module:active { opacity: .75; }
+
+/* ═══════════════════════════════════════════════
+   MISC UTILITIES
+═══════════════════════════════════════════════ */
+.pill {
+  display: inline-flex; align-items: center;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+.divider { height: 1px; background: var(--warm); margin: 4px 0; }
+.add-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px; cursor: pointer;
+  color: var(--green); font-size: 14px; font-weight: 500;
+  transition: opacity .15s;
+}
+.add-row:active { opacity: .6; }
+.add-row-icon { font-size: 20px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: calc(var(--tab-h) + var(--safe-bot) + 14px);
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(28,24,20,.88); color: #fff;
+  padding: 10px 20px; border-radius: 24px;
+  font-size: 13.5px; white-space: nowrap;
+  opacity: 0; z-index: 999;
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+  backdrop-filter: blur(8px);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Nutrition */
+.nutr-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px; font-size: 14px; color: var(--text-mid);
+}
+.nutr-item + .nutr-item { border-top: 1px solid var(--warm); }
+
+/* iOS install banner */
+#install-banner {
+  position: fixed; bottom: calc(var(--tab-h) + var(--safe-bot));
+  left: 12px; right: 12px; z-index: 500;
+  background: #fff; border-radius: var(--radius);
+  box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+  padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+  transform: translateY(20px); opacity: 0;
+  animation: slideUp .4s .8s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes slideUp {
+  to { transform: translateY(0); opacity: 1; }
+}
+#install-banner.hidden { display: none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Status bar safe area -->
+  <div id="status-bar"></div>
+
+  <!-- Pages -->
+  <div id="pages">
+
+    <!-- ═══ TODAY PAGE ═══════════════════════════════ -->
+    <div class="page active" id="page-today">
+      <div class="page-header">
+        <div>
+          <div class="page-title">今日</div>
+          <div class="page-subtitle" id="today-header-date"></div>
+        </div>
+        <button class="header-btn" onclick="resetChecks()" title="重置打勾">↺</button>
+      </div>
+      <div class="page-scroll">
+        <!-- Hero progress card -->
+        <div class="today-hero">
+          <div class="today-date" id="today-hero-date"></div>
+          <div class="today-greeting" id="today-greeting"></div>
+          <div class="progress-row">
+            <div class="progress-ring-wrap">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="4"/>
+                <circle id="prog-circle" cx="24" cy="24" r="20" fill="none" stroke="#fff" stroke-width="4"
+                  stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66"
+                  style="transition:stroke-dashoffset .5s ease;"/>
+              </svg>
+              <div class="progress-pct" id="prog-pct">0%</div>
+            </div>
+            <div class="progress-info">
+              <div><strong id="prog-done">0</strong> / <span id="prog-total">0</span> 项已完成</div>
+              <div style="margin-top:2px;font-size:12px;opacity:.75;">今日任务进度</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily schedule blocks -->
+        <div id="today-tasks"></div>
+
+        <!-- Nutrition quick -->
+        <div class="section-gap"></div>
+        <div class="section-label">🥗 今日营养速查</div>
+        <div class="card" id="nutr-card-today">
+          <div id="nutr-today-content"></div>
+          <div class="add-row" onclick="openSheet('sheet-nutrition')">
+            <span class="add-row-icon">✏️</span>编辑营养清单
+          </div>
+        </div>
+
+        <!-- Min version -->
+        <div class="section-gap"></div>
+        <div class="section-label">🌸 最小执行版 · 精力不足时</div>
+        <div class="card" id="min-card">
+          <div id="min-list"></div>
+          <div style="text-align:center;padding:10px 16px 14px;font-size:12.5px;color:var(--text-soft);">完成以上五项 = 今天 100 分 🌸</div>
+        </div>
+
+        <!-- Daily reflection -->
+        <div class="section-gap"></div>
+        <div class="section-label">📝 今日反思</div>
+        <div class="card">
+          <div id="reflect-fields"></div>
+          <div style="padding:10px 16px 14px;">
+            <button onclick="saveReflection()" style="width:100%;padding:12px;background:var(--green);color:#fff;border-radius:var(--radius-sm);font-size:14px;font-weight:600;">保存今日反思</button>
+          </div>
+        </div>
+
+        <div style="height:8px;"></div>
+      </div>
+    </div>
+
+    <!-- ═══ SYSTEM PAGE ════════════════════════════ -->
+    <div class="page" id="page-system">
+      <!-- Dept list -->
+      <div id="system-list" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+        <div class="page-header">
+          <div>
+            <div class="page-title">系统</div>
+            <div class="page-subtitle">四大部门 · 项目档案</div>
+          </div>
+        </div>
+        <div class="page-scroll" id="dept-list-scroll">
+          <div id="dept-cards"></div>
+        </div>
+      </div>
+
+      <!-- Dept detail (hidden initially) -->
+      <div id="system-detail" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+        <div class="detail-header">
+          <button class="back-btn" onclick="hideDeptDetail()">←</button>
+          <div class="detail-title-wrap">
+            <div class="detail-title" id="detail-title"></div>
+            <div class="detail-sub" id="detail-sub"></div>
+          </div>
+          <button class="header-btn" onclick="openDeptEditSheet()" style="font-size:13px;">✏️</button>
+        </div>
+        <div class="page-scroll" id="detail-scroll">
+          <div id="detail-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MAP PAGE ══════════════════════════════ -->
+    <div class="page" id="page-map">
+      <div class="page-header">
+        <div>
+          <div class="page-title">全局视图</div>
+          <div class="page-subtitle">拖动 · 捏合缩放 · 点击跳转</div>
+        </div>
+        <button class="header-btn" onclick="mmReset()">⊙</button>
+      </div>
+      <div id="map-svg-wrap">
+        <svg id="map-svg" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="root-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#4A8A54"/>
+              <stop offset="100%" stop-color="#2E547A"/>
+            </linearGradient>
+            <filter id="mm-drop">
+              <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(28,24,20,.15)"/>
+            </filter>
+          </defs>
+          <g id="mm-g"></g>
+        </svg>
+        <div class="map-controls">
+          <button class="map-btn" onclick="mmZoom(1.3)">＋</button>
+          <button class="map-btn" onclick="mmZoom(.77)">－</button>
+          <button class="map-btn" onclick="mmToggle()" id="mm-toggle-btn" title="切换层级">≡</button>
+        </div>
+        <div style="position:absolute;bottom:14px;left:14px;background:rgba(250,247,242,.88);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:10px;padding:9px 13px;font-size:11.5px;color:var(--text-soft);">
+          拖动平移 · 双指缩放 · 点击跳转
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ VISION PAGE ════════════════════════════ -->
+    <div class="page" id="page-vision">
+      <div class="page-header">
+        <div>
+          <div class="page-title">愿景</div>
+          <div class="page-subtitle">Part 1 · 吸引力法则</div>
+        </div>
+      </div>
+      <div class="page-scroll">
+        <div class="vision-card">
+          <div class="vision-card-header">
+            <div>
+              <div style="font-size:11px;color:var(--text-soft);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px;">抽象层</div>
+              <div class="vision-card-title">✨ 愿景宣言</div>
+            </div>
+            <button class="edit-btn-sm" onclick="openVisionSheet('abstract')">✏️</button>
+          </div>
+          <div class="vision-card-body" id="vision-abstract"></div>
+        </div>
+
+        <div class="vision-card">
+          <div class="vision-card-header">
+            <div>
+              <div style="font-size:11px;color:var(--text-soft);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px;">具象层</div>
+              <div class="vision-card-title">🌅 十年理想画面</div>
+            </div>
+            <button class="edit-btn-sm" onclick="openVisionSheet('concrete')">✏️</button>
+          </div>
+          <div class="vision-card-body" id="vision-concrete"></div>
+        </div>
+
+        <!-- How to use -->
+        <div class="section-gap"></div>
+        <div class="section-label">使用指南</div>
+        <div class="card">
+          <div class="row">
+            <div class="row-icon">💫</div>
+            <div class="row-body">
+              <div class="row-title">吸引力法则</div>
+              <div class="row-sub">建议每周重读一次愿景宣言，让它成为内在罗盘。清晰描述并感受你想要的状态，宇宙会将资源对准你。</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-icon">🌱</div>
+            <div class="row-body">
+              <div class="row-title">正念核心</div>
+              <div class="row-sub">允许自己有起伏，允许项目暂停，允许修改计划。这本手册是工具，不是枷锁——它与你共同成长。</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:8px;"></div>
+      </div>
+    </div>
+
+
+    <!-- ═══ AI PAGE ══════════════════════════════ -->
+    <div class="page" id="page-ai">
+      <div class="page-header">
+        <div>
+          <div class="page-title">AI 顾问</div>
+          <div class="page-subtitle" id="ai-status-label">你的专属健康顾问</div>
+        </div>
+        <button class="header-btn" onclick="openSheet('sheet-apikey')" title="API 设置" id="ai-key-btn" style="font-size:13px;">⚙️</button>
+      </div>
+      <!-- Chat area -->
+      <div id="chat-scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px;overscroll-behavior:contain;">
+        <div id="chat-messages"></div>
+        <div id="chat-typing" style="display:none;padding:10px 0;">
+          <div class="ai-bubble">
+            <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+          </div>
+        </div>
+      </div>
+      <!-- Suggestions strip -->
+      <div id="ai-suggestions" style="padding:8px 16px 6px;border-top:1px solid var(--border);overflow-x:auto;white-space:nowrap;display:flex;gap:8px;-webkit-overflow-scrolling:touch;flex-shrink:0;">
+        <button class="suggest-chip" onclick="aiSuggestProjects()">💡 建议新项目</button>
+        <button class="suggest-chip" onclick="aiWeekSummary()">📊 本周总结</button>
+        <button class="suggest-chip" onclick="aiMotivate()">🌸 今日鼓励</button>
+        <button class="suggest-chip" onclick="aiCheckIn()">✅ 打卡分析</button>
+      </div>
+      <!-- Input bar -->
+      <div id="chat-input-bar" style="padding:10px 16px;padding-bottom:max(10px, calc(var(--safe-bot) + 2px));border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end;flex-shrink:0;background:var(--cream);">
+        <textarea id="chat-input" placeholder="问我任何关于健康、计划、情绪的问题…" style="flex:1;border:1.5px solid var(--border);border-radius:20px;padding:10px 16px;font-size:15px;background:#fff;outline:none;resize:none;max-height:100px;line-height:1.5;overflow-y:auto;" rows="1" oninput="autoResize(this)" onkeydown="chatKeydown(event)"></textarea>
+        <button id="chat-send-btn" onclick="sendChat()" style="width:42px;height:42px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /pages -->
+
+  <!-- Bottom Tab Bar -->
+  <div id="tab-bar">
+    <div class="tab-item active" onclick="switchTab('today')" id="tab-today">
+      <div class="tab-icon">🌸</div>
+      <div class="tab-label">今日</div>
+    </div>
+    <div class="tab-item" onclick="switchTab('system')" id="tab-system">
+      <div class="tab-icon">🏗️</div>
+      <div class="tab-label">系统</div>
+    </div>
+    <div class="tab-item" onclick="switchTab('map')" id="tab-map">
+      <div class="tab-icon">🗺️</div>
+      <div class="tab-label">地图</div>
+    </div>
+    <div class="tab-item" onclick="switchTab('vision')" id="tab-vision">
+      <div class="tab-icon">✨</div>
+      <div class="tab-label">愿景</div>
+    </div>
+    <div class="tab-item" onclick="switchTab('ai')" id="tab-ai">
+      <div class="tab-icon">🤖</div>
+      <div class="tab-label">AI</div>
+      <div class="tab-dot" id="tab-ai-dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SHEETS
+════════════════════════════════════════════════ -->
+
+<!-- Vision edit sheet -->
+<div class="sheet-overlay" id="overlay-vision" onclick="closeSheet('sheet-vision')"></div>
+<div class="sheet" id="sheet-vision">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title" id="vision-sheet-title">编辑愿景</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-vision')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <input type="hidden" id="vision-field">
+    <div class="form-group">
+      <label class="form-label">内容</label>
+      <textarea class="form-textarea" id="vision-input" style="min-height:220px;"></textarea>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="closeSheet('sheet-vision')">取消</button>
+    <button class="btn-primary" onclick="saveVision()">保存</button>
+  </div>
+</div>
+
+<!-- Project detail/edit sheet -->
+<div class="sheet-overlay" id="overlay-proj" onclick="closeSheet('sheet-proj')"></div>
+<div class="sheet" id="sheet-proj" style="max-height:94vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title" id="proj-sheet-title">项目</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-proj')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <input type="hidden" id="proj-dept-id">
+    <input type="hidden" id="proj-proj-id">
+    <button class="ai-gen-btn" id="proj-ai-btn" onclick="aiGenerateProject()">
+      🤖 AI 帮我写项目详情
+    </button>
+    <div class="form-group">
+      <label class="form-label">项目名称（或简单描述你的想法）</label>
+      <input class="form-input" id="proj-name" placeholder="例：478呼吸法练习计划">
+    </div>
+    <div class="form-group">
+      <label class="form-label">状态</label>
+      <select class="form-select" id="proj-status">
+        <option value="active">🔵 进行中</option>
+        <option value="planned">🌱 计划中</option>
+        <option value="done">✅ 已完成</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">项目描述</label>
+      <textarea class="form-textarea" id="proj-desc" placeholder="这个项目的目标、做法和收获…"></textarea>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="closeSheet('sheet-proj')">取消</button>
+    <button class="btn-primary" onclick="saveProject()">保存</button>
+  </div>
+</div>
+
+<!-- Dept edit sheet -->
+<div class="sheet-overlay" id="overlay-dept" onclick="closeSheet('sheet-dept')"></div>
+<div class="sheet" id="sheet-dept">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">编辑部门信息</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-dept')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <input type="hidden" id="dept-edit-id">
+    <div class="form-group">
+      <label class="form-label">存在意义</label>
+      <textarea class="form-textarea" id="dept-meaning-input"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">核心职责</label>
+      <textarea class="form-textarea" id="dept-duties-input"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">短期目标（1-3个月）</label>
+      <textarea class="form-textarea" id="dept-goal-short"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">中期目标（3-12个月）</label>
+      <textarea class="form-textarea" id="dept-goal-mid"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">长期目标（1年以上）</label>
+      <textarea class="form-textarea" id="dept-goal-long"></textarea>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="closeSheet('sheet-dept')">取消</button>
+    <button class="btn-primary" onclick="saveDeptEdit()">保存</button>
+  </div>
+</div>
+
+<!-- Module view sheet -->
+<div class="sheet-overlay" id="overlay-module" onclick="closeSheet('sheet-module')"></div>
+<div class="sheet" id="sheet-module" style="max-height:92vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div>
+      <div id="module-dept-label" style="font-size:11px;color:var(--text-soft);letter-spacing:.5px;margin-bottom:3px;"></div>
+      <div class="sheet-title" id="module-title"></div>
+    </div>
+    <button class="sheet-close" onclick="closeSheet('sheet-module')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div id="module-freq-badge" style="margin-bottom:16px;"></div>
+    <div id="module-steps"></div>
+    <div id="module-notes"></div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="openModuleEditSheet(currentModProjId)">✏️ 编辑</button>
+    <button class="btn-primary" onclick="closeSheet('sheet-module')">完成</button>
+  </div>
+</div>
+
+<!-- Module edit sheet -->
+<div class="sheet-overlay" id="overlay-modedit" onclick="closeSheet('sheet-modedit')"></div>
+<div class="sheet" id="sheet-modedit" style="max-height:94vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">编辑每日实践模块</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-modedit')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <input type="hidden" id="modedit-proj-id">
+    <button class="ai-gen-btn" id="mod-ai-btn" onclick="aiGenerateModule()">
+      🤖 AI 帮我生成实践步骤
+    </button>
+    <div style="font-size:12.5px;color:var(--text-soft);margin-bottom:14px;padding:10px 13px;background:var(--teal-bg);border-radius:var(--radius-sm);line-height:1.7;">
+      💡 每日实践模块是项目落实到每天的操作指南，可在今日页随时查阅。
+    </div>
+    <div class="form-group">
+      <label class="form-label">模块标题</label>
+      <input class="form-input" id="modedit-title" placeholder="例：🌬 478呼吸法 · 每日练习">
+    </div>
+    <div class="form-group">
+      <label class="form-label">执行频率</label>
+      <input class="form-input" id="modedit-freq" placeholder="例：每天2次 · 起床后 & 睡前">
+    </div>
+    <div class="form-group">
+      <label class="form-label">实践步骤（每行：emoji 标签 | 内容）</label>
+      <textarea class="form-textarea" id="modedit-steps" style="min-height:160px;font-size:14px;" placeholder="🪑 准备 | 坐直，闭眼…&#10;1️⃣ 呼气 | 先完全呼出…&#10;2️⃣ 吸气4秒 | 鼻子吸气…"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">温馨提示</label>
+      <textarea class="form-textarea" id="modedit-notes" style="min-height:70px;"></textarea>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="closeSheet('sheet-modedit')">取消</button>
+    <button class="btn-primary" onclick="saveModuleEdit()">保存</button>
+  </div>
+</div>
+
+<!-- Schedule item edit sheet -->
+<div class="sheet-overlay" id="overlay-task" onclick="closeSheet('sheet-task')"></div>
+<div class="sheet" id="sheet-task">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title" id="task-sheet-title">添加事项</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-task')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <input type="hidden" id="task-block-id">
+    <input type="hidden" id="task-item-id">
+    <div class="form-group">
+      <label class="form-label">时间</label>
+      <input class="form-input" id="task-time" placeholder="例：07:30 或 起床后">
+    </div>
+    <div class="form-group">
+      <label class="form-label">事项内容</label>
+      <input class="form-input" id="task-text" placeholder="例：晨间散步 30-40分钟">
+    </div>
+    <div class="form-group">
+      <label class="form-label">来源项目</label>
+      <input class="form-input" id="task-source" placeholder="例：每日晨间散步计划">
+    </div>
+    <div class="form-group">
+      <label class="form-label">关联每日实践模块</label>
+      <select class="form-select" id="task-proj"></select>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="closeSheet('sheet-task')">取消</button>
+    <button class="btn-primary" onclick="saveTask()">保存</button>
+  </div>
+</div>
+
+<!-- Nutrition edit sheet -->
+<div class="sheet-overlay" id="overlay-nutrition" onclick="closeSheet('sheet-nutrition')"></div>
+<div class="sheet" id="sheet-nutrition">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">编辑营养速查</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-nutrition')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="form-group">
+      <label class="form-label">✅ 积极摄入（每行一条）</label>
+      <textarea class="form-textarea" id="nutr-good" style="min-height:140px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">⚠️ 减少或避免（每行一条）</label>
+      <textarea class="form-textarea" id="nutr-avoid" style="min-height:140px;"></textarea>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="closeSheet('sheet-nutrition')">取消</button>
+    <button class="btn-primary" onclick="saveNutrition()">保存</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══ SHEET: API Key Setup ═══ -->
+<div class="sheet-overlay" id="overlay-apikey" onclick="closeSheet('sheet-apikey')"></div>
+<div class="sheet" id="sheet-apikey">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">⚙️ AI 设置</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-apikey')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div style="background:var(--green-bg);border-radius:var(--radius-sm);padding:13px 15px;margin-bottom:18px;font-size:13.5px;color:var(--text-mid);line-height:1.7;">
+      🔒 API Key 仅存储在你的手机本地（IndexedDB），不会上传到任何地方。
+      前往 <strong>console.anthropic.com</strong> 免费注册获取 Key，新用户有免费额度。
+    </div>
+    <div class="form-group">
+      <label class="form-label">Anthropic API Key</label>
+      <input class="form-input" id="api-key-input" type="password" placeholder="sk-ant-api03-…" autocomplete="off">
+      <div class="api-key-status" id="api-key-status"></div>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="closeSheet('sheet-apikey')">取消</button>
+    <button class="btn-primary" onclick="saveApiKey()">保存</button>
+  </div>
+</div>
+
+<!-- ═══ SHEET: AI Project Suggestions ═══ -->
+<div class="sheet-overlay" id="overlay-aiprojs" onclick="closeSheet('sheet-aiprojs')"></div>
+<div class="sheet" id="sheet-aiprojs" style="max-height:90vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">💡 AI 建议的新项目</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-aiprojs')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div style="font-size:13.5px;color:var(--text-soft);margin-bottom:14px;line-height:1.6;">根据你现有的系统分析，以下是 AI 建议可以尝试的新项目。点击「添加到系统」一键加入对应部门。</div>
+    <div id="ai-proj-suggestions-list"></div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-primary" onclick="closeSheet('sheet-aiprojs')">完成</button>
+  </div>
+</div>
+
+
+
+<!-- iOS install banner -->
+<div id="install-banner" class="hidden">
+  <div style="font-size:32px;flex-shrink:0;">🌸</div>
+  <div style="flex:1;">
+    <div style="font-weight:700;font-size:14px;margin-bottom:3px;">添加到主屏幕</div>
+    <div style="font-size:12.5px;color:var(--text-soft);line-height:1.5;">点底部 <strong style="color:var(--green);">分享 ↑</strong> → 「添加到主屏幕」→ 「添加」</div>
+  </div>
+  <button onclick="document.getElementById('install-banner').classList.add('hidden');localStorage.setItem('pwa_shown','1')" style="font-size:18px;color:var(--text-soft);padding:4px;flex-shrink:0;">✕</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// INDEXEDDB STORAGE
+// ═══════════════════════════════════════════════════════
+const DB_NAME = 'LifeRestart', DB_VER = 1, STORE = 'data';
+let db = null;
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror = () => rej(req.error);
+  });
+}
+function dbGet(key) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).get(key);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+function dbSet(key, val) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).put(val, key);
+    req.onsuccess = () => res();
+    req.onerror = () => rej(req.error);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// DEFAULT DATA
+// ═══════════════════════════════════════════════════════
+const DEFAULT_DATA = {
+  vision: {
+    abstract: `这个系统存在的意义，是帮助我以温柔而科学的方式，重新认识并爱护自己的身体与内心。
+
+我相信身体有修复自己的智慧，我相信平静的心灵会带来健康的激素，我相信每一个微小的好习惯，都在悄悄改变我的细胞与命运。
+
+这个系统不是对抗疾病的战场，而是滋养生命的花园。
+
+我的核心目标是：每一天都比昨天多一点点活力，多一点点平静，多一点点喜悦。我是自己身体最好的朋友，也是自己人生最用心的园丁。`,
+    concrete: `那是一个阳光明媚的清晨，我在宽敞明亮的卧室里自然醒来，没有闹钟的焦虑。
+
+我走到阳台，捧着一杯温热的姜黄牛奶，看着院子里的花开得正好。我的皮肤有光泽，步伐从容，心里有一种踏实的喜悦。
+
+我的身体指标一切正常，每半年的复查都是好消息。我对医生说："我感觉比生病前还要好。"
+
+我深深地爱着自己，也被深深地爱着。🌸`
+  },
+  departments: [
+    {
+      id:'dept1', emoji:'🌿', name:'身体营养摄入', colorHex:'#3A6B42', bgHex:'#EAF3EB',
+      meaning:'你给身体输入什么，它就用什么原料来修复和运转。科学、温和的营养摄入，是一切康复与活力的基础燃料。',
+      duties:'管理一切进入身体的物质——食物营养、水分摄入、光照、维生素与营养补充剂、饮食习惯，以及身体所处的物理环境质量。',
+      goals:{ short:'建立每日营养饮食记录习惯，依据康复营养学制定科学食谱，减少高风险食物摄入。', mid:'形成直觉性的健康饮食习惯，营养指标（维生素D、铁等）恢复到健康范围。', long:'拥有完全适合自己体质的个性化营养体系，饮食成为一种享受而非负担。' },
+      projects:[
+        {id:'p1',name:'纯素食主义饮食实验',status:'done',desc:'尝试过一段时间完全植物性饮食。优点：蔬果摄入增加，身体感觉清爽；挑战：蛋白质和B12摄入不足，后期体力下降。收获：了解了全植物饮食的边界，学会更注意蛋白质来源。'},
+        {id:'p2',name:'生酮饮食探索',status:'done',desc:'短期尝试高脂低碳饮食。初期体重有变化，但身体较疲惫，不适合长期坚持。了解了身体对极端饮食结构的反应，建立了对身体信号的觉察。'},
+        {id:'p3',name:'科学康复营养食谱计划',status:'active',desc:'依据乳腺癌康复营养学研究，制定个性化每日饮食指南。涵盖推荐食物（十字花科蔬菜、豆制品、富含Omega-3食物）、需减少的高风险食物（酒精、加工肉类、精制糖）、每日营养素参考量。每周调整一次食谱，持续追踪身体反应。',
+          dailyModule:{title:'🥗 每日饮食执行指南',frequency:'每餐参照 · 每日记录',
+            steps:[{icon:'🌅',label:'早餐',text:'杂粮粥/燕麦+豆浆+煮蛋+小份蔬菜（西兰花、菠菜）。避免白粥配腐乳。'},{icon:'☀️',label:'上午加餐',text:'一小把坚果（核桃5颗/亚麻籽1茶匙）+一杯温水。'},{icon:'🌸',label:'午餐',text:'一份深色蔬菜+豆腐或鱼肉（三文鱼/沙丁鱼优先）+适量主食（糙米/杂粮饭）。'},{icon:'🌙',label:'晚餐',text:'清淡为主。蒸煮代替煎炸，少盐少油。半碗主食+两种蔬菜+少量优质蛋白。'},{icon:'📝',label:'每日记录',text:'晚餐后花2分钟记录今日饮食亮点和需要改进的地方。'}],
+            notes:'每周可以给自己安排一顿"心情餐"——吃一道自己喜欢的菜，享受食物带来的快乐。营养是滋养，不是惩罚。🌿'}},
+        {id:'p4',name:'阳光与水分日常打卡',status:'active',desc:'每日追踪日照时间（目标20分钟户外）和饮水量（目标1500-2000ml）。充足阳光有助于维生素D合成，支持免疫系统功能。',
+          dailyModule:{title:'☀️ 阳光与水分日常指南',frequency:'全天执行 · 早晚打卡',
+            steps:[{icon:'💧',label:'起床即喝水',text:'起床后第一件事：喝一杯200ml温水（不要冰水）。激活身体，帮助肠胃蠕动。'},{icon:'🌤',label:'晨间阳光',text:'早饭后散步时确保户外日照≥20分钟。不要戴墨镜（允许眼睛接受自然光），但涂防晒保护皮肤。'},{icon:'⏰',label:'全天补水节奏',text:'每小时约150ml：起床/09:00/11:00/13:00/15:00/17:00/19:00/21:00，共约1600ml。'},{icon:'🌅',label:'下午光照',text:'17:00前后在阳台或窗边晒10-15分钟，不必外出。帮助调节昼夜节律，改善夜间睡眠。'},{icon:'✅',label:'睡前打卡',text:'睡前确认：今日喝水≥1500ml ✓  户外日照≥20分钟 ✓  感受身体有无变化。'}],
+            notes:'阴天或雨天无法保证户外日照时，可以坐在明亮的窗边30分钟代替。不要为没做到而内疚，记录即是进步。'}},
+        {id:'p5',name:'中医食养调理探索',status:'planned',desc:'计划结合中医体质辨识（如气虚、阴虚），咨询中医师后制定个性化食养方案，将西医营养学与中医食疗相结合，进一步优化身体调理方式。'},
+        {id:'p6',name:'肠道菌群健康优化计划',status:'planned',desc:'研究发酵食品（泡菜、酸奶、味噌）和益生元食物对肠道健康的影响。计划逐步引入发酵食品，三个月后评估消化状态和整体能量感变化。'}
+      ]
+    },
+    {
+      id:'dept2', emoji:'🏃', name:'身体运动输出', colorHex:'#2E6B7F', bgHex:'#E4F1F5',
+      meaning:'适度的运动能改善淋巴循环、平衡激素、提升免疫力，并直接影响心情与睡眠质量。运动是给身体最好的礼物之一。',
+      duties:'管理你身体的日常使用方式——运动类型与频率、作息时间表、每日活动量、户外接触自然的时间，以及避免过度久坐或过度疲劳。',
+      goals:{ short:'养成每天至少30分钟温和活动的习惯（如散步、拉伸），建立规律的作息节奏，逐步恢复活动能力。', mid:'引入适合身体状况的康复运动（如八段锦、游泳、瑜伽），体能明显提升，不再感到长期疲惫。', long:'维持长期稳定的运动习惯，成为生活方式的一部分；体能状态超越生病前水平，运动带来快乐而非负担。' },
+      projects:[
+        {id:'p7',name:'居家拉伸恢复计划（术后初期）',status:'done',desc:'术后早期进行的温和拉伸运动，主要针对肩部和上肢活动度恢复。坚持了约6周，肩关节活动范围明显改善，也帮助建立了每天有意识活动身体的习惯。'},
+        {id:'p8',name:'每日晨间散步计划',status:'active',desc:'每天早饭后进行30-40分钟户外慢速散步，以公园或社区绿道为主。目标是稳定血糖、促进淋巴循环、获得自然光照、改善心情。已坚持每周5次，计划长期维持。',
+          dailyModule:{title:'🚶 晨间散步实践指南',frequency:'每天早饭后 · 30-40分钟',
+            steps:[{icon:'🕐',label:'出发时机',text:'早饭后20-30分钟出发，血糖稍稳定后再散步，避免空腹运动引起低血糖。'},{icon:'👟',label:'速度与姿势',text:'慢速步行——感觉"可以舒适讲话"的节奏。抬头挺胸，手臂自然摆动，脚跟先落地。'},{icon:'🌿',label:'路线建议',text:'选有树木和绿植的路线（公园、社区绿道）。接触自然对情绪的积极作用比硬地面运动更明显。'},{icon:'🌬',label:'途中练习',text:'走路时可以轻柔地进行腹式呼吸：吸气4步·呼气4步。感受脚踩地面的踏实感。'},{icon:'✅',label:'回来后',text:'喝一杯水，感受身体的变化：有没有比出发前更轻盈？记录下来。'}],
+            notes:'雨天或身体不适时，改为在室内慢走15分钟+窗边接受自然光，同样有效。散步不是任务，是给自己的礼物。'}},
+        {id:'p9',name:'八段锦/五禽戏练习计划',status:'planned',desc:'传统中医康复功法，动作温和、全身性，特别适合康复期人群。计划学习基础套路，从每天10分钟开始，逐步增加到30分钟，配合呼吸练习。'},
+        {id:'p10',name:'水中运动（游泳/水中步行）',status:'planned',desc:'水的浮力减轻关节压力，适合术后体能恢复阶段。计划在身体状态允许后尝试每周2次水中运动，同时享受水的放松感与乐趣。'}
+      ]
+    },
+    {
+      id:'dept3', emoji:'🌸', name:'情绪与心情管理', colorHex:'#5C4A8A', bgHex:'#EDE9F6',
+      meaning:'情绪不是软弱，是生理信号。长期焦虑会导致皮质醇升高，影响免疫系统功能，并干扰睡眠与修复。照顾情绪，就是照顾身体。',
+      duties:'管理日常情绪状态、压力水平、睡眠质量、激素平衡相关的生活习惯（如日晒、社交、放松），以及建立应对焦虑的工具包。',
+      goals:{ short:'建立每日情绪觉察习惯（如晚间简短记录），掌握2-3个快速舒缓焦虑的工具（呼吸法、散步、音乐），睡眠质量有所改善。', mid:'焦虑感明显降低，对治疗建立平静接纳的心态；拥有可靠的情绪支持圈（家人、朋友、心理咨询）。', long:'发展出稳定的内在平静感，压力来临时有成熟的应对智慧；生活中的喜悦感、满足感大于恐惧与担忧。' },
+      projects:[
+        {id:'p11',name:'心理咨询初探（短期）',status:'done',desc:'接受了几次心理咨询，学习到了认知重构的基本方法，能够识别焦虑思维的模式。虽然时间较短，但建立了对心理健康工具的了解和信任感。'},
+        {id:'p12',name:'每日情绪觉察日记',status:'active',desc:'每晚睡前用5分钟记录当天的情绪变化——什么让我感到担忧，什么让我感到平静或开心。不做评判，只做觉察。帮助识别情绪模式，减少情绪在无意识中积累的压力。',
+          dailyModule:{title:'📓 情绪觉察日记 · 每晚5分钟',frequency:'每晚睡前 · 约5分钟',
+            steps:[{icon:'🕯',label:'准备',text:'关掉手机屏幕，找到一个安静的角落。拿出笔记本或打开备忘录。深呼吸三次，让身体慢下来。'},{icon:'🌡',label:'身体扫描',text:'从头到脚扫描一遍：哪里有紧绷感？哪里感到沉重或轻盈？不评判，只是注意到。'},{icon:'💭',label:'今日情绪',text:'写下今天印象最深的一个情绪时刻。是什么触发了它？你当时做了什么反应？'},{icon:'⭐',label:'今日亮点',text:'今天有没有哪一刻感到平静、开心或满足？哪怕很微小——一口好吃的饭、一缕阳光、一句暖心的话。'},{icon:'🌸',label:'明日一句话',text:'给明天的自己写一句话：可以是鼓励，可以是提醒，可以只是"明天我会好好照顾自己"。'}],
+            notes:'写完后不要回头评判自己写的内容。这个日记是给自己看的，没有对错，只有真实。即使只写一句话也算完成。'}},
+        {id:'p13',name:'呼吸放松练习（478呼吸法）',status:'active',desc:'每天1-2次练习4-7-8呼吸法（吸气4秒·屏息7秒·呼气8秒），有效激活副交感神经，降低急性焦虑感。特别在治疗相关焦虑来袭时使用，已感受到明显的镇定效果。',
+          dailyModule:{title:'🌬 478呼吸法 · 每日放松练习',frequency:'每天2次：起床后 & 睡前 · 3-5分钟',
+            steps:[{icon:'🪑',label:'姿势准备',text:'坐直或躺下均可。闭上眼睛，双手放在膝盖或腹部，感受身体与椅子/床的接触。'},{icon:'1️⃣',label:'呼气清空',text:'先用嘴彻底呼出肺里的空气，发出"呼——"的声音，完全清空。'},{icon:'2️⃣',label:'吸气4秒',text:'闭嘴，用鼻子平静地吸气，默数1-2-3-4。感受腹部（而非胸部）轻轻鼓起。'},{icon:'3️⃣',label:'屏息7秒',text:'屏住呼吸，默数1-2-3-4-5-6-7。这个步骤会让神经系统从"战斗"状态切换。'},{icon:'4️⃣',label:'呼气8秒',text:'用嘴缓慢呼气，发"呼"声，默数1-2-3-4-5-6-7-8。让所有紧绷随呼吸离开身体。'},{icon:'🔄',label:'循环次数',text:'早晨：3个循环  ·  睡前：5个循环  ·  焦虑来袭时：随时做2-3个循环即可感受到效果。'}],
+            notes:'如果屏息7秒感觉太长，可以从4-4-6开始。不用追求完美节奏，舒适最重要。练习一周后节奏会变得自然。'}},
+        {id:'p14',name:'正念冥想入门计划',status:'planned',desc:'计划从引导式冥想APP入手，每天10分钟，聚焦于身体扫描和呼吸观察。目标是在三个月内建立稳定的冥想习惯，提升对当下时刻的专注力与平静感。'},
+        {id:'p15',name:'社交连接滋养计划',status:'planned',desc:'计划每周安排1-2次有意义的社交活动——与家人共餐、与老友视频、加入一个兴趣小组。真实的人际连接是情绪健康最有效的滋养来源之一。'}
+      ]
+    },
+    {
+      id:'dept4', emoji:'🌟', name:'精神核心与自我成长', colorHex:'#9A5E1E', bgHex:'#F8EDDA',
+      meaning:'这个部门是系统中最抽象也最深远的部分。它代表你的信念、你的人生观、你对自己生命意义的理解。它是你一切行动的终极动力来源。',
+      duties:'长期记录与迭代你对生命的理解——你的核心信念、内在价值观、人生的喜悦之源；定期反思和更新，让这些洞见流回其他三个部门，成为养分。',
+      goals:{ short:'写下3-5条你现在最核心的人生信念或感悟，开始探索让自己感到有意义的事（爱好、关系、贡献）。', mid:'发展出属于自己的正念或冥想实践，定期（每月一次）回顾自己的成长与变化，建立与生命更深的联结。', long:'拥有清晰的人生价值排序，知道什么对你真正重要；活得越来越有意识，越来越从容，成为家人心中平静有力的存在。' },
+      projects:[
+        {id:'p16',name:'生命回顾与感恩书写（初稿）',status:'done',desc:'写下了自己人生中最重要的十件事与最感恩的十个人。这个过程让我意识到生命中美好事物的丰盛，建立了感恩视角的基础。'},
+        {id:'p17',name:'人生重启系统 · 本手册',status:'active',desc:'这本手册本身就是一个长期运行的精神项目。它记录我的成长轨迹，帮我在每一个人生阶段重新认识自己。每季度更新一次，不断迭代优化，是我给自己最用心的礼物。',
+          dailyModule:{title:'🌟 精神滋养 · 每日微实践',frequency:'每天随时 · 每周深度更新',
+            steps:[{icon:'☀️',label:'晨间一句话（每天）',text:'早起后默读愿景宣言第一段。只需30秒。让这天从一个有意义的信念开始。'},{icon:'💭',label:'觉察练习（每天）',text:'问自己：今天有没有哪一刻感到"这就是活着的意义"？可以很微小——一杯好茶、阳光落在手上的感觉。'},{icon:'📝',label:'感恩记录（每天）',text:'睡前写下今天一件感到感恩的事。不要重复，试着找不同的角度。一年后这个清单会成为你最珍贵的财富。'},{icon:'🗺',label:'周回顾（每周一次）',text:'每周日花15分钟：回顾这一周哪些项目做得好？哪个部门需要关注？有没有新的想法要加入系统？'},{icon:'🌱',label:'季度更新（每季度）',text:'更新这本手册：回顾目标进展，调整项目状态，补充新的项目想法，重写十年画面（如果有新的感悟）。'}],
+            notes:'精神成长没有固定形式。有时候一首歌、一本书的某句话、一次散步中的顿悟，都是这个部门的收获。随时记录，随时更新。'}},
+        {id:'p18',name:'精读一本生命智慧之书',status:'planned',desc:'计划每季度精读一本与生命、康复、内心平静相关的书籍（如《当下的力量》《活出生命的意义》《身体从未忘记》），读后写下300字感悟，让书中的智慧融入自己的生命系统。'},
+        {id:'p19',name:'兴趣复兴计划',status:'planned',desc:'重新拾起一件曾经热爱但因为忙碌而放下的事——绘画、手工、音乐、园艺……目的不是成为专家，而是让灵魂有一个自由呼吸的空间，找回"为自己而活"的喜悦感。'}
+      ]
+    }
+  ],
+  schedule: [
+    { id:'s1', period:'🌅 早晨', time_range:'起床 ~ 09:00', color:'#3A6B42',
+      items:[
+        {id:'si1',time:'起床后',task:'喝一杯温水（200ml）',source:'阳光与水分打卡',projectId:'p4',checked:false},
+        {id:'si2',time:'起床后',task:'拉开窗帘，迎接阳光',source:'情绪管理',checked:false},
+        {id:'si3',time:'起床后',task:'478呼吸法 × 3个循环',source:'呼吸放松练习',projectId:'p13',checked:false},
+        {id:'si4',time:'07:30',task:'营养早餐（参照食谱）',source:'科学康复营养食谱',projectId:'p3',checked:false},
+        {id:'si5',time:'08:00',task:'晨间散步 30-40分钟',source:'每日晨间散步计划',projectId:'p8',checked:false}
+      ]},
+    { id:'s2', period:'🌤 上午', time_range:'09:00 ~ 12:00', color:'#2E6B7F',
+      items:[
+        {id:'si6',time:'09:00',task:'服用营养补充剂（维生素D等）',source:'科学康复营养食谱',projectId:'p3',checked:false},
+        {id:'si7',time:'10:00',task:'补充水分（目标每小时150ml）',source:'阳光与水分打卡',projectId:'p4',checked:false},
+        {id:'si8',time:'11:00',task:'轻度拉伸或八段锦练习（10分钟）',source:'身体运动输出',checked:false},
+        {id:'si9',time:'11:30',task:'准备午餐食材（参照食谱）',source:'科学康复营养食谱',projectId:'p3',checked:false}
+      ]},
+    { id:'s3', period:'🌸 下午', time_range:'12:00 ~ 18:00', color:'#5C4A8A',
+      items:[
+        {id:'si10',time:'12:00',task:'营养午餐（参照食谱）',source:'科学康复营养食谱',projectId:'p3',checked:false},
+        {id:'si11',time:'饭后',task:'餐后10分钟慢走',source:'散步计划 · 血糖管理',projectId:'p8',checked:false},
+        {id:'si12',time:'13:00',task:'午休 20-30分钟（不强求）',source:'情绪管理 · 睡眠修复',checked:false},
+        {id:'si13',time:'15:00',task:'自由时间 · 阅读/手工/园艺',source:'精神成长',projectId:'p17',checked:false},
+        {id:'si14',time:'17:00',task:'户外散步或阳台接触自然光',source:'阳光与水分打卡',projectId:'p4',checked:false}
+      ]},
+    { id:'s4', period:'🌙 晚间', time_range:'18:00 ~ 睡前', color:'#3D3028',
+      items:[
+        {id:'si15',time:'18:00',task:'营养晚餐（参照食谱 · 宜清淡）',source:'科学康复营养食谱',projectId:'p3',checked:false},
+        {id:'si16',time:'餐后',task:'记录今日饮食与水分摄入',source:'阳光与水分打卡',projectId:'p4',checked:false},
+        {id:'si17',time:'20:00',task:'减少屏幕使用，进入放松模式',source:'情绪管理 · 睡眠质量',checked:false},
+        {id:'si18',time:'21:00',task:'478呼吸法 × 5个循环',source:'呼吸放松练习',projectId:'p13',checked:false},
+        {id:'si19',time:'21:15',task:'情绪觉察日记（5分钟）',source:'每日情绪觉察日记',projectId:'p12',checked:false},
+        {id:'si20',time:'22:00',task:'准时上床（目标7-8小时睡眠）',source:'情绪管理 · 激素修复',checked:false}
+      ]}
+  ],
+  nutrition:{
+    good:['🥦 十字花科蔬菜（西兰花、白菜、芥蓝）','🫘 豆制品（豆腐、豆浆、毛豆）','🐟 富含Omega-3的鱼类（三文鱼、沙丁鱼）','🫐 深色浆果（蓝莓、草莓、桑葚）','🌰 坚果一小把（核桃、亚麻籽）','🥕 五色蔬菜、菌菇类','💧 温水 1500-2000ml / 天'],
+    avoid:['🚫 酒精及含酒精饮料','🚫 加工肉类（培根、香肠、腊肉）','🚫 精制糖和高糖甜点','🚫 高温油炸食品','🚫 含防腐剂的超加工食品','🚫 过量红肉（每周不超过2次）','⚠️ 豆腐/大豆：适量（咨询医生）']
+  },
+  minVersion:[
+    {icon:'💧',text:'喝足够的水（至少1000ml）',color:'#2E6B7F'},
+    {icon:'🥦',text:'吃三顿营养的正餐',color:'#3A6B42'},
+    {icon:'☀️',text:'走出门晒10分钟太阳',color:'#9A5E1E'},
+    {icon:'🌬',text:'做一次478呼吸（5个循环）',color:'#5C4A8A'},
+    {icon:'📝',text:'写下今天一件温暖的小事',color:'#8E3A52'}
+  ],
+  reflectionPrompts:[
+    {label:'🌡️ 身体感受',placeholder:'能量感 · 疼痛 · 睡眠质量……',color:'#3A6B42'},
+    {label:'💭 今日心情',placeholder:'焦虑 · 平静 · 开心 · 担忧……',color:'#5C4A8A'},
+    {label:'⭐ 今日最好的一件事',placeholder:'哪怕只有一件小事……',color:'#9A5E1E'},
+    {label:'🌸 明天想对自己说',placeholder:'鼓励 · 期待 · 小目标……',color:'#8E3A52'}
+  ],
+  reflection:{}
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let state = null;
+let currentTab = 'today';
+let currentDeptId = null;
+let currentModProjId = null;
+let toastTimer = null;
+
+function uid() { return '_' + Math.random().toString(36).substr(2,8); }
+
+async function loadState() {
+  const saved = await dbGet('appState').catch(()=>null);
+  state = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+  // Merge new keys from DEFAULT_DATA if missing
+  if (!state.reflection) state.reflection = {};
+  if (!state.minVersion) state.minVersion = DEFAULT_DATA.minVersion;
+}
+
+async function persist() {
+  await dbSet('appState', JSON.stringify(state));
+}
+
+function showToast(msg, duration=2000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function findProject(projId) {
+  for (const d of state.departments) {
+    const p = d.projects.find(x => x.id === projId);
+    if (p) return { proj:p, dept:d };
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB NAVIGATION
+// ═══════════════════════════════════════════════════════
+function switchTab(tab) {
+  if (currentTab === tab) return;
+  currentTab = tab;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'today') renderToday();
+  if (tab === 'system') renderDeptList();
+  if (tab === 'map') { setTimeout(renderMap, 80); }
+  if (tab === 'vision') renderVision();
+}
+
+// ═══════════════════════════════════════════════════════
+// SHEETS
+// ═══════════════════════════════════════════════════════
+function openSheet(id) {
+  document.getElementById('overlay-' + id.replace('sheet-','')).classList.add('open');
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSheet(id) {
+  const overlay = id.replace('sheet-','overlay-');
+  document.getElementById(overlay)?.classList.remove('open');
+  document.getElementById(id)?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ═══════════════════════════════════════════════════════
+// TODAY TAB
+// ═══════════════════════════════════════════════════════
+function renderToday() {
+  const now = new Date();
+  const days = ['日','一','二','三','四','五','六'];
+  const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · 周${days[now.getDay()]}`;
+  document.getElementById('today-header-date').textContent = dateStr;
+  document.getElementById('today-hero-date').textContent = dateStr;
+
+  const greetings = ['早安，好好照顾自己🌿', '上午好，一点一点来🌸', '午安，记得好好吃饭☀️', '下午好，感恩今天🌤', '晚上好，今天辛苦了🌙', '夜深了，早点休息💤'];
+  const h = now.getHours();
+  document.getElementById('today-greeting').textContent = h < 6 ? greetings[5] : h < 10 ? greetings[0] : h < 12 ? greetings[1] : h < 14 ? greetings[2] : h < 18 ? greetings[3] : greetings[4];
+
+  updateProgress();
+  renderTasks();
+  renderNutritionToday();
+  renderMinVersion();
+  renderReflection();
+}
+
+function updateProgress() {
+  const allItems = state.schedule.flatMap(b => b.items);
+  const done = allItems.filter(i => i.checked).length;
+  const total = allItems.length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const circumference = 125.66;
+  const offset = circumference - (pct/100)*circumference;
+  document.getElementById('prog-circle').style.strokeDashoffset = offset;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-done').textContent = done;
+  document.getElementById('prog-total').textContent = total;
+}
+
+function renderTasks() {
+  const container = document.getElementById('today-tasks');
+  container.innerHTML = '';
+
+  state.schedule.forEach(block => {
+    const wrap = document.createElement('div');
+    wrap.className = 'card'; wrap.style.marginBottom = '12px';
+
+    const header = document.createElement('div');
+    header.className = 'block-header';
+    const doneCount = block.items.filter(i=>i.checked).length;
+    header.innerHTML = `
+      <div class="block-dot" style="background:${block.color};"></div>
+      <span class="block-label">${block.period}</span>
+      <span class="block-time">${block.time_range}</span>
+      <span style="font-size:12px;color:var(--text-soft);margin-left:8px;">${doneCount}/${block.items.length}</span>`;
+    wrap.appendChild(header);
+
+    block.items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'task-item';
+
+      // Module button
+      let modBtn = '';
+      if (item.projectId) {
+        const found = findProject(item.projectId);
+        if (found?.proj.dailyModule?.title) {
+          modBtn = `<button class="task-module-btn" style="color:${found.dept.colorHex};border-color:${found.dept.colorHex}44;background:${found.dept.colorHex}0D;" onclick="openModuleSheet('${item.projectId}')">📋</button>`;
+        }
+      }
+
+      row.innerHTML = `
+        <div class="task-check ${item.checked?'done':''}" onclick="toggleTask('${block.id}','${item.id}')"></div>
+        <div class="task-body">
+          <div class="task-title ${item.checked?'done':''}">${item.task}</div>
+          <div class="task-meta">
+            ${item.time ? `<span class="task-time">${item.time}</span>` : ''}
+            ${item.source ? `<span style="color:${block.color};font-size:11.5px;">${item.source}</span>` : ''}
+            ${modBtn}
+          </div>
+        </div>`;
+      wrap.appendChild(row);
+    });
+
+    // Add button
+    const addRow = document.createElement('div');
+    addRow.className = 'add-row';
+    addRow.innerHTML = `<span class="add-row-icon">＋</span>添加事项`;
+    addRow.onclick = () => openTaskSheet(block.id, null);
+    wrap.appendChild(addRow);
+
+    container.appendChild(wrap);
+  });
+}
+
+function toggleTask(blockId, itemId) {
+  const block = state.schedule.find(b=>b.id===blockId);
+  const item = block.items.find(i=>i.id===itemId);
+  item.checked = !item.checked;
+  persist();
+  renderTasks();
+  updateProgress();
+}
+
+function resetChecks() {
+  state.schedule.forEach(b => b.items.forEach(i => i.checked = false));
+  persist();
+  renderToday();
+  showToast('今日打勾已重置 ↺');
+}
+
+function renderNutritionToday() {
+  const c = document.getElementById('nutr-today-content');
+  c.innerHTML = '';
+  const good = state.nutrition.good.slice(0,4);
+  const avoid = state.nutrition.avoid.slice(0,3);
+  good.forEach(g => {
+    c.innerHTML += `<div class="nutr-item"><span style="color:var(--green);font-size:13px;font-weight:700;">✓</span>${g}</div>`;
+  });
+  avoid.forEach(a => {
+    c.innerHTML += `<div class="nutr-item"><span style="color:var(--rose);font-size:13px;font-weight:700;">✕</span>${a}</div>`;
+  });
+}
+
+function renderMinVersion() {
+  const c = document.getElementById('min-list');
+  c.innerHTML = '';
+  state.minVersion.forEach((item,i) => {
+    c.innerHTML += `
+      <div class="min-item">
+        <span class="min-icon">${item.icon}</span>
+        <span class="min-text">${item.text}</span>
+        <div class="min-check" id="min-${i}" onclick="toggleMin(${i})"></div>
+      </div>`;
+  });
+}
+
+function toggleMin(i) {
+  const el = document.getElementById('min-' + i);
+  el.classList.toggle('done');
+}
+
+function renderReflection() {
+  const today = new Date().toDateString();
+  const saved = state.reflection?.[today] || {};
+  const c = document.getElementById('reflect-fields');
+  c.innerHTML = '';
+  state.reflectionPrompts.forEach((p,i) => {
+    c.innerHTML += `
+      <div class="reflect-field">
+        <div class="reflect-label" style="color:${p.color};">${p.label}</div>
+        <textarea class="reflect-input" id="reflect-${i}" placeholder="${p.placeholder}">${saved[i]||''}</textarea>
+      </div>`;
+  });
+}
+
+function saveReflection() {
+  const today = new Date().toDateString();
+  if (!state.reflection) state.reflection = {};
+  const data = {};
+  state.reflectionPrompts.forEach((_,i) => {
+    data[i] = document.getElementById('reflect-'+i)?.value || '';
+  });
+  state.reflection[today] = data;
+  persist();
+  showToast('今日反思已保存 🌸');
+}
+
+// ═══════════════════════════════════════════════════════
+// NUTRITION
+// ═══════════════════════════════════════════════════════
+function openNutritionSheet() {
+  document.getElementById('nutr-good').value = state.nutrition.good.join('\n');
+  document.getElementById('nutr-avoid').value = state.nutrition.avoid.join('\n');
+  openSheet('sheet-nutrition');
+}
+function saveNutrition() {
+  state.nutrition.good = document.getElementById('nutr-good').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  state.nutrition.avoid = document.getElementById('nutr-avoid').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  persist(); closeSheet('sheet-nutrition');
+  renderNutritionToday(); showToast('营养清单已更新');
+}
+
+// ═══════════════════════════════════════════════════════
+// SYSTEM TAB - Dept list
+// ═══════════════════════════════════════════════════════
+function renderDeptList() {
+  const c = document.getElementById('dept-cards');
+  c.innerHTML = '';
+  state.departments.forEach(dept => {
+    const active = dept.projects.filter(p=>p.status==='active').length;
+    const done = dept.projects.filter(p=>p.status==='done').length;
+    const planned = dept.projects.filter(p=>p.status==='planned').length;
+    const total = dept.projects.length;
+    const pct = total ? Math.round(done/total*100) : 0;
+
+    const card = document.createElement('div');
+    card.className = 'dept-card';
+    card.onclick = () => showDeptDetail(dept.id);
+    card.innerHTML = `
+      <div class="dept-header">
+        <div class="dept-emoji">${dept.emoji}</div>
+        <div class="dept-info">
+          <div class="dept-name" style="color:${dept.colorHex};">${dept.name}</div>
+          <div class="dept-meaning">${dept.meaning.substring(0,55)}…</div>
+        </div>
+        <div style="color:var(--border);font-size:18px;">›</div>
+      </div>
+      <div class="dept-stats">
+        <span class="stat-pill" style="background:${dept.bgHex};color:${dept.colorHex};">🔵 进行中 ${active}</span>
+        <span class="stat-pill" style="background:#F8EDDA;color:#9A5E1E;">🌱 计划中 ${planned}</span>
+        <span class="stat-pill" style="background:#F5F5F0;color:#888;">✅ 完成 ${done}</span>
+      </div>
+      <div class="dept-progress">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-soft);margin-bottom:5px;"><span>完成率</span><span>${pct}%</span></div>
+        <div class="dept-prog-bar"><div class="dept-prog-fill" style="width:${pct}%;background:${dept.colorHex};"></div></div>
+      </div>`;
+    c.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// DEPT DETAIL
+// ═══════════════════════════════════════════════════════
+function showDeptDetail(deptId) {
+  currentDeptId = deptId;
+  const dept = state.departments.find(d=>d.id===deptId);
+  document.getElementById('system-list').style.display = 'none';
+  document.getElementById('system-detail').style.display = 'flex';
+  document.getElementById('detail-title').textContent = dept.emoji + ' ' + dept.name;
+  document.getElementById('detail-sub').textContent = dept.meaning.substring(0,42) + '…';
+  renderDeptDetail(dept);
+}
+
+function hideDeptDetail() {
+  document.getElementById('system-list').style.display = 'flex';
+  document.getElementById('system-detail').style.display = 'none';
+  currentDeptId = null;
+}
+
+function renderDeptDetail(dept) {
+  const c = document.getElementById('detail-content');
+  c.innerHTML = '';
+
+  // Goals section
+  const goalSection = document.createElement('div');
+  goalSection.className = 'section-gap';
+  goalSection.innerHTML = `<div class="section-label">🎯 部门目标</div>`;
+  const goalsCard = document.createElement('div');
+  goalsCard.className = 'card';
+  goalsCard.innerHTML = `
+    <div class="goals-row">
+      <div class="goal-item" style="background:${dept.bgHex};">
+        <div class="goal-tag" style="color:${dept.colorHex};">🟢 短期目标 · 1-3个月</div>
+        <div class="goal-text">${dept.goals.short}</div>
+      </div>
+      <div class="goal-item" style="background:${dept.bgHex}88;">
+        <div class="goal-tag" style="color:${dept.colorHex}99;">🔵 中期目标 · 3-12个月</div>
+        <div class="goal-text">${dept.goals.mid}</div>
+      </div>
+      <div class="goal-item" style="background:${dept.bgHex}44;">
+        <div class="goal-tag" style="color:${dept.colorHex}77;">⭐ 长期目标 · 1年以上</div>
+        <div class="goal-text">${dept.goals.long}</div>
+      </div>
+    </div>`;
+  goalSection.appendChild(goalsCard);
+  c.appendChild(goalSection);
+
+  // Projects
+  const statusGroups = [
+    {status:'active', label:'🔵 进行中', color: dept.colorHex},
+    {status:'planned', label:'🌱 计划中', color:'#9A5E1E'},
+    {status:'done', label:'✅ 已完成', color:'#888'}
+  ];
+
+  statusGroups.forEach(g => {
+    const items = dept.projects.filter(p=>p.status===g.status);
+    const section = document.createElement('div');
+    section.className = 'section-gap';
+    section.innerHTML = `<div class="section-label" style="color:${g.color};">${g.label}</div>`;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    items.forEach(proj => {
+      const dotColor = g.status==='active' ? dept.colorHex : g.status==='planned' ? '#D4975A' : '#C0B8B0';
+      const hasMod = proj.dailyModule?.title;
+      const item = document.createElement('div');
+      item.className = 'proj-item';
+      item.onclick = () => openProjSheet(dept.id, proj.id);
+      item.innerHTML = `
+        <div class="proj-status-dot" style="background:${dotColor};"></div>
+        <div class="proj-body">
+          <div class="proj-name">${proj.name}</div>
+          <div class="proj-desc">${proj.desc}</div>
+          ${hasMod ? `<div class="proj-module-badge" style="background:${dept.colorHex};" onclick="event.stopPropagation();openModuleSheet('${proj.id}')">📋 ${proj.dailyModule.title}</div>` : ''}
+        </div>
+        <div style="color:var(--border);font-size:16px;flex-shrink:0;">›</div>`;
+      card.appendChild(item);
+    });
+
+    // Add project button
+    const addRow = document.createElement('div');
+    addRow.className = 'add-row';
+    addRow.innerHTML = `<span class="add-row-icon">＋</span>添加${g.label.replace(/^[🔵🌱✅]\s/,'')}项目`;
+    addRow.onclick = () => openNewProjSheet(dept.id, g.status);
+    card.appendChild(addRow);
+
+    section.appendChild(card);
+    c.appendChild(section);
+  });
+
+  c.insertAdjacentHTML('beforeend', '<div style="height:8px;"></div>');
+}
+
+function openDeptEditSheet() {
+  if (!currentDeptId) return;
+  const dept = state.departments.find(d=>d.id===currentDeptId);
+  document.getElementById('dept-edit-id').value = currentDeptId;
+  document.getElementById('dept-meaning-input').value = dept.meaning;
+  document.getElementById('dept-duties-input').value = dept.duties;
+  document.getElementById('dept-goal-short').value = dept.goals.short;
+  document.getElementById('dept-goal-mid').value = dept.goals.mid;
+  document.getElementById('dept-goal-long').value = dept.goals.long;
+  openSheet('sheet-dept');
+}
+
+function saveDeptEdit() {
+  const deptId = document.getElementById('dept-edit-id').value;
+  const dept = state.departments.find(d=>d.id===deptId);
+  dept.meaning = document.getElementById('dept-meaning-input').value;
+  dept.duties = document.getElementById('dept-duties-input').value;
+  dept.goals.short = document.getElementById('dept-goal-short').value;
+  dept.goals.mid = document.getElementById('dept-goal-mid').value;
+  dept.goals.long = document.getElementById('dept-goal-long').value;
+  persist(); closeSheet('sheet-dept');
+  renderDeptDetail(dept);
+  showToast('部门信息已更新');
+}
+
+// ═══════════════════════════════════════════════════════
+// PROJECT SHEET
+// ═══════════════════════════════════════════════════════
+function openProjSheet(deptId, projId) {
+  const dept = state.departments.find(d=>d.id===deptId);
+  const proj = dept.projects.find(p=>p.id===projId);
+  document.getElementById('proj-dept-id').value = deptId;
+  document.getElementById('proj-proj-id').value = projId;
+  document.getElementById('proj-sheet-title').textContent = proj.name;
+  document.getElementById('proj-name').value = proj.name;
+  document.getElementById('proj-status').value = proj.status;
+  document.getElementById('proj-desc').value = proj.desc;
+  openSheet('sheet-proj');
+}
+
+function openNewProjSheet(deptId, status='active') {
+  document.getElementById('proj-dept-id').value = deptId;
+  document.getElementById('proj-proj-id').value = '';
+  document.getElementById('proj-sheet-title').textContent = '添加新项目';
+  document.getElementById('proj-name').value = '';
+  document.getElementById('proj-status').value = status;
+  document.getElementById('proj-desc').value = '';
+  openSheet('sheet-proj');
+}
+
+function saveProject() {
+  const deptId = document.getElementById('proj-dept-id').value;
+  const projId = document.getElementById('proj-proj-id').value;
+  const name = document.getElementById('proj-name').value.trim();
+  const status = document.getElementById('proj-status').value;
+  const desc = document.getElementById('proj-desc').value.trim();
+  if (!name) { showToast('请填写项目名称'); return; }
+  const dept = state.departments.find(d=>d.id===deptId);
+  if (projId) {
+    const proj = dept.projects.find(p=>p.id===projId);
+    proj.name=name; proj.status=status; proj.desc=desc;
+  } else {
+    dept.projects.push({id:uid(), name, status, desc});
+  }
+  persist(); closeSheet('sheet-proj');
+  renderDeptDetail(dept);
+  showToast(projId ? '项目已更新' : '项目已添加');
+}
+
+// ═══════════════════════════════════════════════════════
+// TASK SHEET
+// ═══════════════════════════════════════════════════════
+function openTaskSheet(blockId, itemId) {
+  document.getElementById('task-block-id').value = blockId;
+  document.getElementById('task-item-id').value = itemId || '';
+  document.getElementById('task-sheet-title').textContent = itemId ? '编辑事项' : '添加事项';
+
+  // Populate project dropdown
+  const sel = document.getElementById('task-proj');
+  sel.innerHTML = '<option value="">— 不关联 —</option>';
+  state.departments.forEach(d => {
+    d.projects.filter(p=>p.status==='active').forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = d.emoji + ' ' + p.name + (p.dailyModule ? ' 📋' : '');
+      sel.appendChild(opt);
+    });
+  });
+
+  if (itemId) {
+    const block = state.schedule.find(b=>b.id===blockId);
+    const item = block.items.find(i=>i.id===itemId);
+    document.getElementById('task-time').value = item.time;
+    document.getElementById('task-text').value = item.task;
+    document.getElementById('task-source').value = item.source;
+    sel.value = item.projectId || '';
+  } else {
+    document.getElementById('task-time').value = '';
+    document.getElementById('task-text').value = '';
+    document.getElementById('task-source').value = '';
+    sel.value = '';
+  }
+  openSheet('sheet-task');
+}
+
+function saveTask() {
+  const blockId = document.getElementById('task-block-id').value;
+  const itemId = document.getElementById('task-item-id').value;
+  const time = document.getElementById('task-time').value.trim();
+  const task = document.getElementById('task-text').value.trim();
+  const source = document.getElementById('task-source').value.trim();
+  const projectId = document.getElementById('task-proj').value || null;
+  if (!task) { showToast('请填写事项内容'); return; }
+  const block = state.schedule.find(b=>b.id===blockId);
+  if (itemId) {
+    const item = block.items.find(i=>i.id===itemId);
+    item.time=time; item.task=task; item.source=source; item.projectId=projectId;
+  } else {
+    block.items.push({id:uid(), time, task, source, projectId, checked:false});
+  }
+  persist(); closeSheet('sheet-task');
+  renderTasks(); updateProgress();
+  showToast(itemId ? '事项已更新' : '事项已添加');
+}
+
+// ═══════════════════════════════════════════════════════
+// MODULE SHEET
+// ═══════════════════════════════════════════════════════
+function openModuleSheet(projId) {
+  const found = findProject(projId);
+  if (!found) return;
+  currentModProjId = projId;
+  const {proj, dept} = found;
+  const mod = proj.dailyModule;
+  if (!mod?.title) { openModuleEditSheet(projId); return; }
+
+  document.getElementById('module-dept-label').textContent = dept.emoji + ' ' + dept.name + ' · ' + proj.name;
+  document.getElementById('module-title').textContent = mod.title;
+
+  const freqEl = document.getElementById('module-freq-badge');
+  freqEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:20px;background:${dept.bgHex};color:${dept.colorHex};font-size:12.5px;font-weight:600;border:1.5px solid ${dept.colorHex}33;">⏰ ${mod.frequency||'每日执行'}</span>`;
+
+  const stepsEl = document.getElementById('module-steps');
+  stepsEl.innerHTML = (mod.steps||[]).map(s => `
+    <div class="module-step-item">
+      <div class="module-step-icon">${s.icon||'▪'}</div>
+      <div>
+        <div class="module-step-label" style="color:${dept.colorHex};">${s.label||''}</div>
+        <div class="module-step-text">${s.text}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('module-notes').innerHTML = mod.notes
+    ? `<div class="module-notes-box"><strong style="color:var(--amber);">💛 温馨提示</strong><br>${mod.notes}</div>` : '';
+
+  openSheet('sheet-module');
+}
+
+function openModuleEditSheet(projId) {
+  const found = findProject(projId);
+  if (!found) return;
+  currentModProjId = projId;
+  const {proj} = found;
+  const mod = proj.dailyModule || {};
+  document.getElementById('modedit-proj-id').value = projId;
+  document.getElementById('modedit-title').value = mod.title || '';
+  document.getElementById('modedit-freq').value = mod.frequency || '';
+  document.getElementById('modedit-notes').value = mod.notes || '';
+  document.getElementById('modedit-steps').value = (mod.steps||[]).map(s=>`${s.icon||''} ${s.label||''} | ${s.text}`).join('\n');
+  closeSheet('sheet-module');
+  openSheet('sheet-modedit');
+}
+
+function saveModuleEdit() {
+  const projId = document.getElementById('modedit-proj-id').value;
+  const found = findProject(projId);
+  if (!found) return;
+  const {proj} = found;
+  const title = document.getElementById('modedit-title').value.trim();
+  const frequency = document.getElementById('modedit-freq').value.trim();
+  const notes = document.getElementById('modedit-notes').value.trim();
+  const rawSteps = document.getElementById('modedit-steps').value.trim();
+  const steps = rawSteps.split('\n').filter(Boolean).map(line => {
+    const si = line.indexOf('|');
+    if (si === -1) return {icon:'▪', label:'', text:line.trim()};
+    const left = line.substring(0,si).trim();
+    const text = line.substring(si+1).trim();
+    const m = left.match(/^(\S+)\s+(.*)/);
+    return m ? {icon:m[1], label:m[2].trim(), text} : {icon:'▪', label:left, text};
+  });
+  proj.dailyModule = {title, frequency, steps, notes};
+  persist(); closeSheet('sheet-modedit');
+  if (currentDeptId) renderDeptDetail(state.departments.find(d=>d.id===currentDeptId));
+  renderTasks();
+  setTimeout(() => openModuleSheet(projId), 100);
+  showToast('模块已保存');
+}
+
+// ═══════════════════════════════════════════════════════
+// VISION
+// ═══════════════════════════════════════════════════════
+function renderVision() {
+  const ab = document.getElementById('vision-abstract');
+  const co = document.getElementById('vision-concrete');
+  if (state.vision.abstract) {
+    ab.className = 'vision-card-body'; ab.textContent = state.vision.abstract;
+  } else {
+    ab.className = 'vision-card-body empty'; ab.textContent = '点击右上角编辑按钮，写下你的愿景宣言……';
+  }
+  if (state.vision.concrete) {
+    co.className = 'vision-card-body'; co.textContent = state.vision.concrete;
+  } else {
+    co.className = 'vision-card-body empty'; co.textContent = '点击右上角编辑按钮，描绘你的十年理想画面……';
+  }
+}
+
+function openVisionSheet(field) {
+  document.getElementById('vision-field').value = field;
+  document.getElementById('vision-sheet-title').textContent = field==='abstract' ? '编辑愿景宣言' : '编辑十年理想画面';
+  document.getElementById('vision-input').value = state.vision[field] || '';
+  openSheet('sheet-vision');
+}
+
+function saveVision() {
+  const field = document.getElementById('vision-field').value;
+  state.vision[field] = document.getElementById('vision-input').value;
+  persist(); closeSheet('sheet-vision');
+  renderVision(); showToast('愿景已更新 ✨');
+}
+
+// ═══════════════════════════════════════════════════════
+// MINDMAP
+// ═══════════════════════════════════════════════════════
+const MM = { tx:0, ty:0, scale:1, dragging:false, lx:0, ly:0, showProj:true };
+
+function renderMap() {
+  const svg = document.getElementById('map-svg');
+  const wrap = document.getElementById('map-svg-wrap');
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+
+  const DEPT_Y_GAP = 180;
+  const PROJ_X = 260, DEPT_X = 230, PROJ_Y_GAP = 56;
+  const RIGHT = [0, 1], LEFT = [2, 3];
+
+  let lines = '', nodes = '';
+
+  // Root node
+  const RX = 0, RY = 0;
+  lines += `<defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4A8A54"/><stop offset="100%" stop-color="#2E547A"/></linearGradient></defs>`;
+  nodes += `<g onclick="switchTab('today')" style="cursor:pointer;">
+    <ellipse cx="${RX}" cy="${RY}" rx="68" ry="32" fill="url(#rg)" filter="url(#mm-drop)"/>
+    <text x="${RX}" y="${RY-5}" text-anchor="middle" font-family="'Noto Serif SC'" font-size="13" font-weight="700" fill="#fff">🌸 人生重启</text>
+    <text x="${RX}" y="${RY+11}" text-anchor="middle" font-family="'Noto Sans SC'" font-size="10" fill="rgba(255,255,255,.7)">Life Restart 2.0</text>
+  </g>`;
+
+  state.departments.forEach((dept, di) => {
+    const side = di < 2 ? 1 : -1;
+    const deptIdx = di < 2 ? di : di - 2;
+
+    // Calculate dept Y based on projects count
+    const projCount = MM.showProj ? dept.projects.filter(p=>p.status==='active'||p.status==='planned').length : 0;
+    const subtreeH = Math.max(1, projCount) * PROJ_Y_GAP;
+    const deptOffsets = [0, 0];
+
+    // Simple layout: evenly spaced depts
+    const DX = side * DEPT_X;
+    const totalDepts = 2;
+    const deptSpacing = DEPT_Y_GAP;
+    const DY = (deptIdx - (totalDepts-1)/2) * deptSpacing;
+
+    // Line root → dept
+    const lx1 = side > 0 ? 68 : -68;
+    const lx2 = side > 0 ? DX - 60 : DX + 60;
+    lines += `<path d="M${lx1},${RY} C${(lx1+lx2)/2},${RY} ${(lx1+lx2)/2},${DY} ${lx2},${DY}" fill="none" stroke="${dept.colorHex}88" stroke-width="2.5" stroke-linecap="round"/>`;
+
+    // Dept node
+    nodes += `<g onclick="(function(){switchTab('system');setTimeout(()=>showDeptDetail('${dept.id}'),80)})()" style="cursor:pointer;">
+      <rect x="${DX-60}" y="${DY-18}" width="120" height="36" rx="18" fill="${dept.colorHex}" filter="url(#mm-drop)"/>
+      <text x="${DX}" y="${DY+6}" text-anchor="middle" font-family="'Noto Serif SC'" font-size="12" font-weight="700" fill="#fff">${dept.emoji} ${dept.name.length>6?dept.name.substring(0,6)+'…':dept.name}</text>
+    </g>`;
+
+    if (!MM.showProj) return;
+
+    // Projects
+    const activeProjs = dept.projects.filter(p=>p.status==='active'||p.status==='planned');
+    activeProjs.forEach((proj, pi) => {
+      const totalProjs = activeProjs.length;
+      const PY = DY + (pi - (totalProjs-1)/2) * PROJ_Y_GAP;
+      const PX = side > 0 ? DX + PROJ_X : DX - PROJ_X;
+      const lx3 = side > 0 ? DX + 60 : DX - 60;
+      const lx4 = side > 0 ? PX - 68 : PX + 68;
+
+      const pColor = proj.status==='active' ? dept.colorHex : '#D4975A';
+      const pFill = proj.status==='active' ? dept.bgHex : '#FBF2E6';
+      const isDash = proj.status==='planned' ? 'stroke-dasharray="5,3"' : '';
+      lines += `<path d="M${lx3},${DY} C${(lx3+lx4)/2},${DY} ${(lx3+lx4)/2},${PY} ${lx4},${PY}" fill="none" stroke="${pColor}66" stroke-width="1.5" ${isDash} stroke-linecap="round"/>`;
+
+      const pName = proj.name.length>10 ? proj.name.substring(0,10)+'…' : proj.name;
+      const hasMod = proj.dailyModule?.title ? '📋' : '';
+      nodes += `<g onclick="(function(){switchTab('system');setTimeout(()=>showDeptDetail('${dept.id}'),80)})()" style="cursor:pointer;">
+        <rect x="${PX-68}" y="${PY-14}" width="136" height="28" rx="14" fill="${pFill}" stroke="${pColor}" stroke-width="1.5"/>
+        <text x="${PX}" y="${PY+5}" text-anchor="middle" font-family="'Noto Sans SC'" font-size="11" fill="${pColor}" font-weight="500">${pName} ${hasMod}</text>
+      </g>`;
+    });
+  });
+
+  svg.innerHTML = `<defs><filter id="mm-drop"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(28,24,20,.15)"/></filter></defs>
+    <g id="mm-g" transform="translate(${W/2 + MM.tx},${H/2 + MM.ty}) scale(${MM.scale})">${lines}${nodes}</g>`;
+  mmBindEvents(svg);
+}
+
+function mmBindEvents(svg) {
+  let startX, startY, startTX, startTY, pinchDist0;
+  svg.onmousedown = e => { MM.dragging=true; startX=e.clientX; startY=e.clientY; startTX=MM.tx; startTY=MM.ty; svg.style.cursor='grabbing'; };
+  svg.onmousemove = e => { if(!MM.dragging) return; MM.tx=startTX+(e.clientX-startX); MM.ty=startTY+(e.clientY-startY); mmApply(); };
+  svg.onmouseup = svg.onmouseleave = () => { MM.dragging=false; svg.style.cursor='grab'; };
+  svg.onwheel = e => { e.preventDefault(); mmZoom(e.deltaY<0?1.1:.91); };
+  svg.ontouchstart = e => {
+    if(e.touches.length===1){MM.dragging=true;startX=e.touches[0].clientX;startY=e.touches[0].clientY;startTX=MM.tx;startTY=MM.ty;}
+    if(e.touches.length===2){MM.dragging=false;pinchDist0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
+  };
+  svg.ontouchmove = e => {
+    e.preventDefault();
+    if(e.touches.length===1&&MM.dragging){MM.tx=startTX+(e.touches[0].clientX-startX);MM.ty=startTY+(e.touches[0].clientY-startY);mmApply();}
+    if(e.touches.length===2&&pinchDist0){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);mmZoom(d/pinchDist0);pinchDist0=d;}
+  };
+  svg.ontouchend = () => { MM.dragging=false; };
+  svg.style.cursor = 'grab';
+}
+
+function mmApply() {
+  const wrap = document.getElementById('map-svg-wrap');
+  const W=wrap.clientWidth, H=wrap.clientHeight;
+  const g = document.getElementById('mm-g');
+  if(g) g.setAttribute('transform',`translate(${W/2+MM.tx},${H/2+MM.ty}) scale(${MM.scale})`);
+}
+
+function mmZoom(f) {
+  MM.scale = Math.min(Math.max(MM.scale*f, .3), 3);
+  mmApply();
+}
+
+function mmReset() { MM.tx=0; MM.ty=0; MM.scale=1; renderMap(); }
+
+function mmToggle() {
+  MM.showProj = !MM.showProj;
+  document.getElementById('mm-toggle-btn').style.background = MM.showProj ? 'rgba(58,107,66,.15)' : '';
+  renderMap();
+}
+
+// ═══════════════════════════════════════════════════════
+// PWA & INIT
+// ═══════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', {scope:'./'}).catch(()=>{}));
+}
+
+// iOS install hint
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.navigator.standalone === true;
+if (isIOS && !isStandalone && !localStorage.getItem('pwa_shown')) {
+  document.getElementById('install-banner').classList.remove('hidden');
+}
+
+// Boot handled by AI engine below
+
+// ═══════════════════════════════════════════════════════
+// AI ENGINE
+// ═══════════════════════════════════════════════════════
+
+let chatHistory = [];
+let aiTyping = false;
+let currentModProjIdForAI = null; // track for module generation
+
+// ── API Key management ──────────────────────────────────
+async function loadApiKey() {
+  const key = await dbGet('apiKey').catch(() => null);
+  const btn = document.getElementById('ai-key-btn');
+  const label = document.getElementById('ai-status-label');
+  if (key) {
+    btn.textContent = '✅';
+    if (label) label.textContent = 'API 已连接 · 专属健康顾问';
+  } else {
+    btn.textContent = '⚙️';
+    if (label) label.textContent = '点击右上角设置 API Key';
+  }
+  return key;
+}
+
+async function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val) { showToast('请输入 API Key'); return; }
+  if (!val.startsWith('sk-ant')) { 
+    document.getElementById('api-key-status').innerHTML = '<span style="color:var(--rose);">⚠️ Key 格式不对，应以 sk-ant 开头</span>';
+    return; 
+  }
+  await dbSet('apiKey', val);
+  closeSheet('sheet-apikey');
+  loadApiKey();
+  showToast('API Key 已保存 🔒');
+  if (currentTab === 'ai' && chatHistory.length === 0) initChat();
+}
+
+async function openApiKeySheet() {
+  const existing = await dbGet('apiKey').catch(() => null);
+  const input = document.getElementById('api-key-input');
+  input.value = existing ? '••••••••••••' + existing.slice(-4) : '';
+  document.getElementById('api-key-status').innerHTML = existing 
+    ? '<span style="color:var(--green);">✅ 已保存</span>' 
+    : '<span style="color:var(--text-soft);">未设置</span>';
+  openSheet('sheet-apikey');
+}
+
+// Override the header button to use openApiKeySheet
+document.getElementById('ai-key-btn').onclick = openApiKeySheet;
+
+// ── Core API call ───────────────────────────────────────
+async function callClaude(messages, systemPrompt = '', maxTokens = 1200) {
+  const key = await dbGet('apiKey').catch(() => null);
+  if (!key) {
+    openApiKeySheet();
+    throw new Error('需要设置 API Key');
+  }
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages
+    })
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content[0].text;
+}
+
+// ── System context builder ──────────────────────────────
+function buildSystemContext() {
+  const depts = state.departments.map(d => {
+    const active = d.projects.filter(p=>p.status==='active').map(p=>p.name);
+    const planned = d.projects.filter(p=>p.status==='planned').map(p=>p.name);
+    const done = d.projects.filter(p=>p.status==='done').map(p=>p.name);
+    return `【${d.emoji} ${d.name}】
+- 进行中：${active.join('、') || '无'}
+- 计划中：${planned.join('、') || '无'}
+- 已完成：${done.join('、') || '无'}`;
+  }).join('
+
+');
+
+  const allItems = state.schedule.flatMap(b => b.items);
+  const checkedToday = allItems.filter(i=>i.checked).length;
+  const totalToday = allItems.length;
+
+  return `你是一位温柔、专业的健康恢复顾问，专门帮助乳腺癌康复期患者。你了解这位用户的完整健康管理系统：
+
+用户的愿景：${state.vision.abstract?.split('
+')[0] || ''}
+
+【四大部门现状】
+${depts}
+
+【今日打卡状态】${checkedToday}/${totalToday} 项已完成
+
+使用原则：
+- 用温柔、支持性的语气，像贴心朋友一样交流
+- 回复要简洁、有实用价值，不要过长
+- 回复使用中文，适当使用emoji增加温暖感
+- 永远不要给出明确的医疗诊断或治疗建议，建议咨询医生
+- 鼓励小的进步，不要批评或施加压力`;
+}
+
+// ── Chat UI ─────────────────────────────────────────────
+function renderChatTab() {
+  loadApiKey().then(key => {
+    if (!key && chatHistory.length === 0) {
+      appendSystemMsg('你好 🌸 欢迎使用 AI 顾问！
+
+请先点击右上角 ⚙️ 设置你的 Anthropic API Key，就可以开始和我聊天了。
+
+💡 去 console.anthropic.com 免费注册获取 Key，新用户有免费额度。');
+    } else if (chatHistory.length === 0) {
+      initChat();
+    }
+  });
+}
+
+function initChat() {
+  const now = new Date();
+  const h = now.getHours();
+  const greeting = h < 6 ? '深夜好' : h < 10 ? '早安' : h < 14 ? '你好' : h < 18 ? '下午好' : '晚上好';
+  const checkedToday = state.schedule.flatMap(b=>b.items).filter(i=>i.checked).length;
+  const totalToday = state.schedule.flatMap(b=>b.items).length;
+  const intro = `${greeting} 🌸 我是你的专属健康顾问，了解你完整的人生重启系统。
+
+今日你已完成 ${checkedToday}/${totalToday} 项打卡任务。
+
+你可以问我任何关于健康、情绪、计划的问题，或者用下方的快捷按钮开始。`;
+  appendSystemMsg(intro);
+}
+
+function appendSystemMsg(text) {
+  const c = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-bubble';
+  div.textContent = text;
+  c.appendChild(div);
+  scrollChatBottom();
+}
+
+function appendUserMsg(text) {
+  const c = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'user-bubble';
+  div.textContent = text;
+  c.appendChild(div);
+  scrollChatBottom();
+}
+
+function appendAiMsg(text, isError = false) {
+  document.getElementById('chat-typing').style.display = 'none';
+  const c = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-bubble' + (isError ? ' error' : '');
+  div.textContent = text;
+  c.appendChild(div);
+  scrollChatBottom();
+  return div;
+}
+
+function scrollChatBottom() {
+  const s = document.getElementById('chat-scroll');
+  setTimeout(() => { s.scrollTop = s.scrollHeight; }, 60);
+}
+
+function showTyping() {
+  document.getElementById('chat-typing').style.display = 'block';
+  scrollChatBottom();
+}
+
+async function sendChat() {
+  if (aiTyping) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = ''; autoResize(input);
+
+  appendUserMsg(text);
+  chatHistory.push({ role: 'user', content: text });
+  showTyping();
+  aiTyping = true;
+  document.getElementById('chat-send-btn').style.opacity = '0.5';
+
+  try {
+    const reply = await callClaude(
+      chatHistory.slice(-12), // keep last 12 messages for context
+      buildSystemContext(),
+      1200
+    );
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendAiMsg(reply);
+  } catch (e) {
+    appendAiMsg('出了点问题：' + e.message, true);
+  } finally {
+    aiTyping = false;
+    document.getElementById('chat-send-btn').style.opacity = '1';
+  }
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ── Quick action chips ──────────────────────────────────
+async function aiMotivate() {
+  if (aiTyping) return;
+  const prompt = '根据我今天的打卡情况，给我一段温柔的鼓励（100字以内）。要真诚、有温度，不要太套路。';
+  chatHistory.push({ role: 'user', content: prompt });
+  appendUserMsg('🌸 今日鼓励');
+  showTyping(); aiTyping = true;
+  try {
+    const reply = await callClaude(chatHistory.slice(-8), buildSystemContext(), 400);
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendAiMsg(reply);
+  } catch(e) { appendAiMsg('出了点问题：' + e.message, true); }
+  finally { aiTyping = false; }
+}
+
+async function aiCheckIn() {
+  if (aiTyping) return;
+  const allItems = state.schedule.flatMap(b => b.items);
+  const done = allItems.filter(i=>i.checked).map(i=>i.task);
+  const pending = allItems.filter(i=>!i.checked).map(i=>i.task);
+  const prompt = `今天我完成了：${done.slice(0,5).join('、') || '还没有打卡'}。还没完成的有：${pending.slice(0,5).join('、')}。根据这个情况给我一个简短的分析和建议（150字以内）。`;
+  chatHistory.push({ role: 'user', content: prompt });
+  appendUserMsg('✅ 打卡分析');
+  showTyping(); aiTyping = true;
+  try {
+    const reply = await callClaude(chatHistory.slice(-8), buildSystemContext(), 600);
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendAiMsg(reply);
+  } catch(e) { appendAiMsg('出了点问题：' + e.message, true); }
+  finally { aiTyping = false; }
+}
+
+async function aiWeekSummary() {
+  if (aiTyping) return;
+  appendUserMsg('📊 本周总结');
+  showTyping(); aiTyping = true;
+  const prompt = '根据我的系统现状，帮我生成一段简短的本周进展总结，并给出下周最重要的1-2个建议（200字以内）。';
+  chatHistory.push({ role: 'user', content: prompt });
+  try {
+    const reply = await callClaude(chatHistory.slice(-8), buildSystemContext(), 600);
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendAiMsg(reply);
+  } catch(e) { appendAiMsg('出了点问题：' + e.message, true); }
+  finally { aiTyping = false; }
+}
+
+// ── AI Project Suggestions ──────────────────────────────
+async function aiSuggestProjects() {
+  if (aiTyping) return;
+  appendUserMsg('💡 建议新项目');
+  showTyping(); aiTyping = true;
+  const prompt = `请根据我现有的系统，为每个部门各建议1个新项目（可以跳过已有类似项目的部门）。
+返回 JSON 格式，不要其他文字：
+[
+  {
+    "deptId": "dept1或dept2或dept3或dept4",
+    "name": "项目名称（10字以内）",
+    "desc": "项目描述（80字以内）",
+    "reason": "为什么建议这个（30字以内）"
+  }
+]`;
+  try {
+    const raw = await callClaude(
+      [{ role: 'user', content: prompt }],
+      buildSystemContext(),
+      800
+    );
+    document.getElementById('chat-typing').style.display = 'none';
+    // Parse JSON
+    const jsonMatch = raw.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('AI 返回格式有误，请重试');
+    const suggestions = JSON.parse(jsonMatch[0]);
+    chatHistory.push({ role: 'assistant', content: '我分析了你的系统，建议了一些新项目，请查看建议页。' });
+    appendAiMsg('我分析了你的系统，建议了 ' + suggestions.length + ' 个新项目，点下方卡片可以直接添加到系统 👇');
+    renderProjectSuggestions(suggestions);
+    openSheet('sheet-aiprojs');
+  } catch(e) {
+    appendAiMsg('出了点问题：' + e.message, true);
+  } finally {
+    aiTyping = false;
+  }
+}
+
+function renderProjectSuggestions(suggestions) {
+  const c = document.getElementById('ai-proj-suggestions-list');
+  c.innerHTML = '';
+  suggestions.forEach(s => {
+    const dept = state.departments.find(d => d.id === s.deptId) || state.departments[0];
+    const card = document.createElement('div');
+    card.className = 'ai-proj-card';
+    card.style.borderColor = dept.colorHex + '44';
+    card.innerHTML = `
+      <div class="ai-proj-card-dept" style="color:${dept.colorHex};">${dept.emoji} ${dept.name}</div>
+      <div class="ai-proj-card-name">${s.name}</div>
+      <div class="ai-proj-card-desc">${s.desc}</div>
+      <div style="font-size:12px;color:var(--text-soft);margin-top:6px;">💡 ${s.reason}</div>
+      <div class="ai-proj-card-add">
+        <button onclick="addSuggestedProject('${dept.id}','${s.name.replace(/'/g, "\'")}','${s.desc.replace(/'/g, "\'")}', this)"
+          style="background:${dept.colorHex};color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;transition:all .15s;">
+          添加到系统
+        </button>
+      </div>`;
+    c.appendChild(card);
+  });
+}
+
+function addSuggestedProject(deptId, name, desc, btn) {
+  const dept = state.departments.find(d => d.id === deptId);
+  if (!dept) return;
+  dept.projects.push({ id: uid(), name, status: 'planned', desc });
+  persist();
+  btn.textContent = '✅ 已添加';
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  showToast(name + ' 已添加到 ' + dept.name);
+  if (currentDeptId === deptId) renderDeptDetail(dept);
+}
+
+// ── AI generate project details ─────────────────────────
+async function aiGenerateProject() {
+  const btn = document.getElementById('proj-ai-btn');
+  const name = document.getElementById('proj-name').value.trim();
+  if (!name) { showToast('请先输入项目名称或简单描述你的想法'); return; }
+
+  btn.classList.add('loading');
+  btn.textContent = '⏳ AI 生成中…';
+
+  const deptId = document.getElementById('proj-dept-id').value;
+  const dept = state.departments.find(d => d.id === deptId);
+
+  try {
+    const prompt = `用户想在「${dept?.name || ''}」部门添加一个项目，她的想法是："${name}"。
+
+请生成完整的项目信息，返回 JSON 格式，不要其他文字：
+{
+  "name": "完整的项目名称（15字以内）",
+  "desc": "项目描述（120字以内，包含：这个项目做什么、有什么作用、预期收获）"
+}`;
+
+    const raw = await callClaude([{ role:'user', content: prompt }], buildSystemContext(), 400);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('格式有误');
+    const result = JSON.parse(jsonMatch[0]);
+    document.getElementById('proj-name').value = result.name;
+    document.getElementById('proj-desc').value = result.desc;
+    showToast('✨ AI 已生成项目详情');
+  } catch(e) {
+    showToast('生成失败：' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '🤖 AI 帮我写项目详情';
+  }
+}
+
+// ── AI generate daily module ────────────────────────────
+async function aiGenerateModule() {
+  const btn = document.getElementById('mod-ai-btn');
+  const projId = document.getElementById('modedit-proj-id').value;
+  const found = findProject(projId);
+  if (!found) { showToast('找不到项目信息'); return; }
+
+  btn.classList.add('loading');
+  btn.textContent = '⏳ AI 生成中…';
+
+  const { proj, dept } = found;
+  try {
+    const prompt = `用户有一个健康管理项目：「${proj.name}」
+项目描述：${proj.desc}
+所属部门：${dept.name}（${dept.meaning}）
+
+请生成这个项目的每日实践模块，返回 JSON 格式，不要其他文字：
+{
+  "title": "模块标题（带emoji，20字以内）",
+  "frequency": "执行频率描述（如：每天2次 · 起床后 & 睡前）",
+  "steps": [
+    {"icon": "emoji", "label": "步骤标签（5字以内）", "text": "详细说明（50字以内）"}
+  ],
+  "notes": "温馨提示（60字以内，用温柔鼓励的语气）"
+}
+steps 3-6个，实用且具体。`;
+
+    const raw = await callClaude([{ role:'user', content: prompt }], buildSystemContext(), 800);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('格式有误');
+    const mod = JSON.parse(jsonMatch[0]);
+
+    document.getElementById('modedit-title').value = mod.title || '';
+    document.getElementById('modedit-freq').value = mod.frequency || '';
+    document.getElementById('modedit-notes').value = mod.notes || '';
+    document.getElementById('modedit-steps').value = (mod.steps || []).map(s => `${s.icon} ${s.label} | ${s.text}`).join('
+');
+    showToast('✨ AI 已生成实践步骤');
+  } catch(e) {
+    showToast('生成失败：' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '🤖 AI 帮我生成实践步骤';
+  }
+}
+
+// ── Patch switchTab to handle 'ai' ──────────────────────
+const _origSwitchTab = switchTab;
+function switchTab(tab) {
+  if (currentTab === tab) return;
+  currentTab = tab;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'today') renderToday();
+  if (tab === 'system') renderDeptList();
+  if (tab === 'map') setTimeout(renderMap, 80);
+  if (tab === 'vision') renderVision();
+  if (tab === 'ai') renderChatTab();
+}
+
+// ── Patch openDB boot to also load API key ──────────────
+const _origBoot = openDB;
+// After state loads, initialize AI key status
+document.addEventListener('DOMContentLoaded', () => {});
+// We'll call loadApiKey after the main boot
+openDB().then(loadState).then(() => {
+  renderToday();
+  renderDeptList();
+  renderVision();
+  loadApiKey();
+}).catch(console.error);
+
+</script>
+</body>
+</html>
