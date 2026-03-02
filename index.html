@@ -620,6 +620,222 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
   to { transform: translateY(0); opacity: 1; }
 }
 #install-banner.hidden { display: none; }
+
+/* ═══════════════════════════════════════════════
+   EXTENSIONS · GUIDE / EXPORT / PROJECT CARDS
+═══════════════════════════════════════════════ */
+.task-actions { display:flex; align-items:center; gap:8px; margin-left:auto; flex-shrink:0; }
+.task-icon-btn {
+  width:28px; height:28px; border-radius:50%;
+  border:1px solid var(--border); background:var(--paper);
+  color:var(--text-soft); font-size:13px;
+  display:flex; align-items:center; justify-content:center;
+}
+.task-icon-btn.danger { color: var(--rose); }
+.task-icon-btn:active { transform: scale(.94); }
+.task-body.clickable { cursor:pointer; }
+.task-body.clickable:active { opacity: .75; }
+
+.proj-card { padding: 14px 16px; }
+.proj-card + .proj-card { margin-top: 10px; }
+.proj-card-head { display:flex; align-items:flex-start; gap:10px; }
+.proj-card-main { flex:1; min-width:0; }
+.proj-card-title { font-size:15px; font-weight:700; color:var(--text); }
+.proj-card-meta { margin-top:8px; display:flex; flex-wrap:wrap; gap:8px; }
+.proj-chip {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 9px; border-radius:999px;
+  font-size:11.5px; font-weight:600;
+  border:1px solid var(--border); background:var(--paper); color:var(--text-mid);
+}
+.proj-guides { margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; }
+.guide-chip {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 10px; border-radius:999px; cursor:pointer;
+  font-size:11.5px; font-weight:600;
+  background:var(--teal-bg); color:var(--teal); border:1px solid #bfd8e1;
+}
+.guide-chip:active { opacity:.75; }
+.proj-card-actions { display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap; }
+.proj-card-btn {
+  padding:8px 12px; border-radius:10px; font-size:12.5px; font-weight:600;
+  border:1px solid var(--border); background:var(--paper); color:var(--text-mid);
+}
+.proj-card-btn.primary { background: var(--green-bg); color: var(--green); border-color: #cfe0d2; }
+
+.proj-card-redesign {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,247,242,.95));
+  box-shadow: 0 8px 22px rgba(28,24,20,.05);
+}
+.proj-card-redesign + .proj-card-redesign { margin-top: 12px; }
+.proj-card-topline { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.proj-card-title-wrap { flex:1; min-width:0; }
+.proj-card-subtitle {
+  margin-top: 5px;
+  font-size: 11.5px;
+  color: var(--text-soft);
+  display:flex; align-items:center; flex-wrap:wrap; gap:6px;
+}
+.proj-card-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding: 5px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700;
+  border: 1px solid var(--border); background: #fff;
+  color: var(--text-mid); flex-shrink:0;
+}
+.proj-card-desc {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.72;
+  color: var(--text-mid);
+}
+.proj-linked-section {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(28,24,20,.06);
+}
+.proj-linked-head {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  font-size: 12.5px; font-weight: 700; color: var(--text);
+}
+.proj-linked-count { font-size: 11px; color: var(--text-soft); font-weight: 600; }
+.proj-linked-list { margin-top: 10px; display:flex; flex-direction:column; gap:8px; }
+.proj-linked-item {
+  display:flex; align-items:flex-start; gap:10px;
+  width:100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(28,24,20,.06);
+  background: #FCFBF8;
+  cursor: pointer;
+}
+.proj-linked-item:active { transform: scale(.99); }
+.proj-linked-item.done { opacity: .72; }
+.proj-linked-time {
+  min-width: 68px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid transparent;
+}
+.proj-linked-body { flex:1; min-width:0; }
+.proj-linked-task {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text);
+}
+.proj-linked-item.done .proj-linked-task { text-decoration: line-through; }
+.proj-linked-sub {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--text-soft);
+}
+.proj-linked-empty {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+.proj-card-footer { margin-top: 12px; }
+
+.guides-empty {
+  padding: 18px 16px; background:#fff; border:1px dashed var(--border); border-radius:var(--radius);
+  color:var(--text-soft); font-size:13px; line-height:1.7;
+}
+.guide-card { padding: 14px 16px; }
+.guide-card + .guide-card { margin-top: 12px; }
+.guide-card-top { display:flex; align-items:flex-start; gap:10px; }
+.guide-card-title { font-size:15px; font-weight:700; color:var(--text); }
+.guide-card-cat {
+  display:inline-flex; align-items:center; padding:4px 10px; border-radius:999px;
+  font-size:11px; font-weight:700; letter-spacing:.3px;
+  background:var(--amber-bg); color:var(--amber); margin-top:8px;
+}
+.guide-card-body {
+  margin-top:12px; color:var(--text-mid); font-size:13.5px; line-height:1.8;
+  display:-webkit-box; -webkit-line-clamp:6; -webkit-box-orient:vertical; overflow:hidden;
+  white-space:pre-wrap;
+}
+.guide-card-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+.guide-action-btn {
+  padding:8px 12px; border-radius:10px; font-size:12.5px; font-weight:600;
+  border:1px solid var(--border); background:var(--paper); color:var(--text-mid);
+}
+.guide-action-btn.primary { background: var(--teal-bg); color: var(--teal); border-color: #bfd8e1; }
+.guide-picker-box {
+  background:#fff; border:1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 8px 10px; min-height: 54px;
+}
+.guide-picker-item { display:flex; align-items:flex-start; gap:10px; padding:8px 4px; }
+.guide-picker-item + .guide-picker-item { border-top:1px solid var(--warm); }
+.guide-picker-item input { margin-top:3px; }
+.guide-picker-title { font-size:14px; color:var(--text); font-weight:600; }
+.guide-picker-sub { font-size:12px; color:var(--text-soft); margin-top:2px; }
+.header-actions { display:flex; align-items:center; gap:8px; }
+
+
+/* Guide cards v2 */
+.guides-stack { display:flex; flex-direction:column; gap:12px; }
+.guide-card-v2 {
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:#fff;
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+.guide-card-toggle {
+  width:100%; display:flex; align-items:center; gap:12px;
+  padding:16px; text-align:left; background:transparent; border:none;
+}
+.guide-card-toggle:active { background: rgba(0,0,0,.02); }
+.guide-card-icon {
+  width:42px; height:42px; border-radius:14px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  background: var(--teal-bg); color: var(--teal); font-size:20px;
+}
+.guide-card-head { flex:1; min-width:0; }
+.guide-card-title-line { display:flex; align-items:center; gap:8px; min-width:0; }
+.guide-card-title-line .guide-card-title { flex:1; min-width:0; }
+.guide-file-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 8px; border-radius:999px; font-size:11px; font-weight:700;
+  background: var(--purple-bg); color: var(--purple); border:1px solid #d8cff0;
+}
+.guide-card-chevron { font-size:14px; color: var(--text-soft); flex-shrink:0; transition: transform .2s ease; }
+.guide-card-v2.expanded .guide-card-chevron { transform: rotate(180deg); }
+.guide-card-preview { font-size:12px; color: var(--text-soft); margin-top:4px; }
+.guide-card-detail {
+  display:none; padding:0 16px 16px; border-top:1px solid var(--warm);
+  background: linear-gradient(180deg, rgba(243,238,230,.45), rgba(255,255,255,1));
+}
+.guide-card-v2.expanded .guide-card-detail { display:block; }
+.guide-card-body { white-space: pre-wrap; line-height:1.75; color: var(--text-mid); padding-top:14px; }
+.guide-file-panel {
+  margin-top:12px; padding:12px; border-radius:14px;
+  background: var(--paper); border:1px solid var(--border);
+}
+.guide-file-name { font-weight:600; font-size:13px; color: var(--text); word-break: break-all; }
+.guide-file-meta { font-size:12px; color: var(--text-soft); margin-top:4px; }
+.guide-editor-file-box {
+  padding:12px; border-radius:14px; background: var(--paper); border:1px dashed var(--border);
+}
+.guide-file-inline-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.guide-hidden-input { display:none; }
+.pdf-viewer-wrap {
+  width:100%; height:62vh; border-radius:14px; overflow:hidden;
+  border:1px solid var(--border); background:#fff;
+}
+.pdf-viewer-wrap iframe { width:100%; height:100%; border:none; background:#fff; }
+.pdf-viewer-hint { font-size:12px; color: var(--text-soft); margin-top:10px; line-height:1.6; }
+
 </style>
 </head>
 <body>
@@ -637,9 +853,12 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
           <div class="page-title">今日</div>
           <div class="page-subtitle" id="today-header-date"></div>
         </div>
-        <button class="header-btn" onclick="resetChecks()" title="重置打勾">↺</button>
+        <div class="header-actions">
+          <button class="header-btn" onclick="exportTodayImage()" title="导出每日计划">⤓</button>
+          <button class="header-btn" onclick="resetChecks()" title="重置打勾">↺</button>
+        </div>
       </div>
-      <div class="page-scroll">
+      <div class="page-scroll" id="today-scroll">
         <!-- Hero progress card -->
         <div class="today-hero">
           <div class="today-date" id="today-hero-date"></div>
@@ -669,7 +888,7 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
         <div class="section-label">🥗 今日营养速查</div>
         <div class="card" id="nutr-card-today">
           <div id="nutr-today-content"></div>
-          <div class="add-row" onclick="openSheet('sheet-nutrition')">
+          <div class="add-row" onclick="openNutritionSheet()">
             <span class="add-row-icon">✏️</span>编辑营养清单
           </div>
         </div>
@@ -815,6 +1034,24 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
       </div>
     </div>
 
+    <!-- ═══ GUIDES PAGE ═══════════════════════════ -->
+    <div class="page" id="page-guides">
+      <div class="page-header">
+        <div>
+          <div class="page-title">指南</div>
+          <div class="page-subtitle">长文本知识卡 · 可关联项目</div>
+        </div>
+        <div class="header-actions">
+          <button class="header-btn" onclick="exportGuidesImage()" title="导出指南">⤓</button>
+          <button class="header-btn" onclick="openGuideSheet()" title="添加指南">＋</button>
+        </div>
+      </div>
+      <div class="page-scroll" id="guides-scroll">
+        <div id="guides-list"></div>
+        <div style="height:8px;"></div>
+      </div>
+    </div>
+
   </div><!-- /pages -->
 
   <!-- Bottom Tab Bar -->
@@ -826,6 +1063,10 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
     <div class="tab-item" onclick="switchTab('system')" id="tab-system">
       <div class="tab-icon">🏗️</div>
       <div class="tab-label">系统</div>
+    </div>
+    <div class="tab-item" onclick="switchTab('guides')" id="tab-guides">
+      <div class="tab-icon">📚</div>
+      <div class="tab-label">指南</div>
     </div>
     <div class="tab-item" onclick="switchTab('map')" id="tab-map">
       <div class="tab-icon">🗺️</div>
@@ -889,6 +1130,13 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
     <div class="form-group">
       <label class="form-label">项目描述</label>
       <textarea class="form-textarea" id="proj-desc" placeholder="这个项目的目标、做法和收获…"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">关联指南</label>
+      <div class="guide-picker-box" id="proj-guide-picker"></div>
+      <div class="add-row" style="padding:10px 2px 0;" onclick="openGuideSheet('', document.getElementById('proj-proj-id').value)">
+        <span class="add-row-icon">＋</span>新建并关联指南
+      </div>
     </div>
   </div>
   <div class="sheet-footer">
@@ -1050,6 +1298,72 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
   </div>
 </div>
 
+<!-- Guide edit sheet -->
+<div class="sheet-overlay" id="overlay-guide" onclick="closeSheet('sheet-guide')"></div>
+<div class="sheet" id="sheet-guide" style="max-height:94vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title" id="guide-sheet-title">添加指南</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-guide')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <input type="hidden" id="guide-id">
+    <input type="hidden" id="guide-attachment-name">
+    <input type="hidden" id="guide-attachment-type">
+    <input type="hidden" id="guide-attachment-mime">
+    <input type="hidden" id="guide-attachment-data">
+    <div class="form-group">
+      <label class="form-label">指南标题</label>
+      <input class="form-input" id="guide-title" placeholder="例：营养食谱指南 / 八段锦动作要领">
+    </div>
+    <div class="form-group">
+      <label class="form-label">分类</label>
+      <input class="form-input" id="guide-category" placeholder="例：饮食 / 运动 / 恢复 / 情绪 / 检查资料">
+    </div>
+    <div class="form-group">
+      <label class="form-label">内容</label>
+      <textarea class="form-textarea" id="guide-content" style="min-height:220px;" placeholder="适合放长文本说明、步骤、注意事项、知识摘要……如导入 PDF，也可以在这里补充摘要说明。"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">附件导入</label>
+      <div class="guide-editor-file-box">
+        <div style="font-size:13px;color:var(--text-mid);line-height:1.7;">支持导入 <strong>PDF</strong>（可在 App 内查看）；也支持导入 txt / md 文本并自动填入内容。</div>
+        <input class="guide-hidden-input" type="file" id="guide-file-input" accept=".pdf,.txt,.md,text/plain,application/pdf" onchange="handleGuideFileInput(event)">
+        <div class="guide-file-inline-actions">
+          <button class="btn-secondary" type="button" onclick="document.getElementById('guide-file-input').click()">导入文件</button>
+          <button class="btn-secondary" type="button" onclick="clearGuideAttachment()">清除附件</button>
+        </div>
+        <div id="guide-file-meta" class="guide-file-meta" style="margin-top:10px;">未选择文件</div>
+      </div>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="closeSheet('sheet-guide')">取消</button>
+    <button class="btn-secondary" onclick="exportCurrentGuideImage()">导出</button>
+    <button class="btn-primary" onclick="saveGuide()">保存</button>
+  </div>
+</div>
+
+<!-- PDF viewer sheet -->
+<div class="sheet-overlay" id="overlay-pdf" onclick="closeSheet('sheet-pdf')"></div>
+<div class="sheet" id="sheet-pdf" style="max-height:94vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title" id="pdf-sheet-title">PDF 预览</div>
+    <button class="sheet-close" onclick="closeSheet('sheet-pdf')">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="pdf-viewer-wrap">
+      <iframe id="pdf-viewer-frame" title="PDF 预览"></iframe>
+    </div>
+    <div class="pdf-viewer-hint">如当前浏览器不支持内嵌 PDF，可点击“在新页打开”继续查看。</div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-secondary" onclick="closeSheet('sheet-pdf')">关闭</button>
+    <button class="btn-primary" onclick="openCurrentPdfInNewTab()">在新页打开</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- iOS install banner -->
@@ -1062,6 +1376,7 @@ input, textarea, select { font-family: inherit; font-size: 16px; /* prevent iOS 
   <button onclick="document.getElementById('install-banner').classList.add('hidden');localStorage.setItem('pwa_shown','1')" style="font-size:18px;color:var(--text-soft);padding:4px;flex-shrink:0;">✕</button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
 // INDEXEDDB STORAGE
@@ -1185,6 +1500,10 @@ const DEFAULT_DATA = {
       ]
     }
   ],
+  guides: [
+    {id:'g1', title:'营养食谱指南', category:'饮食', content:'早餐优先保证蛋白质 + 复合碳水 + 蔬菜，例如燕麦、豆浆、鸡蛋与深色蔬菜。\n\n午餐按“半盘蔬菜 + 四分之一优质蛋白 + 四分之一主食”来搭配。\n\n晚餐尽量清淡，避免过晚、过油、过甜。\n\n如果当天状态差，至少保证喝水、蛋白质和一份热食。'},
+    {id:'g2', title:'八段锦动作要领', category:'运动', content:'练习时先放松肩颈，动作宁慢勿快，重心稳定，呼吸自然。\n\n每个动作做到“有牵拉感但不疼”，尤其术后或恢复期，更要避免过度用力。\n\n结束后站立片刻，感受呼吸和心率恢复，再补充少量温水。'}
+  ],
   schedule: [
     { id:'s1', period:'🌅 早晨', time_range:'起床 ~ 09:00', color:'#3A6B42',
       items:[
@@ -1247,6 +1566,9 @@ let currentTab = 'today';
 let currentDeptId = null;
 let currentModProjId = null;
 let toastTimer = null;
+let pendingGuideLinkProjectId = null;
+let expandedGuideIds = new Set();
+let currentPdfDataUrl = '';
 
 function uid() { return '_' + Math.random().toString(36).substr(2,8); }
 
@@ -1269,12 +1591,129 @@ function showToast(msg, duration=2000) {
   toastTimer = setTimeout(() => t.classList.remove('show'), duration);
 }
 
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+function formatGuideContent(content) {
+  return escapeHtml(content || '暂无文字内容').replace(/\\n/g, '<br>');
+}
+function updateGuideFileMeta() {
+  const name = document.getElementById('guide-attachment-name')?.value || '';
+  const type = document.getElementById('guide-attachment-type')?.value || '';
+  const meta = document.getElementById('guide-file-meta');
+  if (!meta) return;
+  if (!name) {
+    meta.textContent = '未选择文件';
+    return;
+  }
+  meta.textContent = type === 'pdf' ? `已附加 PDF：${name}` : `已导入文本文件：${name}`;
+}
+function clearGuideAttachment() {
+  const fileInput = document.getElementById('guide-file-input');
+  if (fileInput) fileInput.value = '';
+  ['guide-attachment-name','guide-attachment-type','guide-attachment-mime','guide-attachment-data'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  updateGuideFileMeta();
+}
+function handleGuideFileInput(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const lower = (file.name || '').toLowerCase();
+  const isPdf = file.type === 'application/pdf' || lower.endsWith('.pdf');
+  const isText = file.type.startsWith('text/') || lower.endsWith('.txt') || lower.endsWith('.md');
+  if (!isPdf && !isText) {
+    showToast('暂时仅支持 PDF / txt / md');
+    event.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  if (isPdf) {
+    reader.onload = () => {
+      document.getElementById('guide-attachment-name').value = file.name;
+      document.getElementById('guide-attachment-type').value = 'pdf';
+      document.getElementById('guide-attachment-mime').value = file.type || 'application/pdf';
+      document.getElementById('guide-attachment-data').value = String(reader.result || '');
+      updateGuideFileMeta();
+      if (!document.getElementById('guide-title').value.trim()) {
+        document.getElementById('guide-title').value = file.name.replace(/\.pdf$/i, '');
+      }
+      showToast('PDF 已导入');
+    };
+    reader.readAsDataURL(file);
+    return;
+  }
+  reader.onload = () => {
+    document.getElementById('guide-content').value = String(reader.result || '');
+    document.getElementById('guide-attachment-name').value = file.name;
+    document.getElementById('guide-attachment-type').value = 'text';
+    document.getElementById('guide-attachment-mime').value = file.type || 'text/plain';
+    document.getElementById('guide-attachment-data').value = '';
+    updateGuideFileMeta();
+    if (!document.getElementById('guide-title').value.trim()) {
+      document.getElementById('guide-title').value = file.name.replace(/\.[^.]+$/, '');
+    }
+    showToast('文本已导入到内容区');
+  };
+  reader.readAsText(file, 'utf-8');
+}
+function toggleGuideExpand(guideId) {
+  if (expandedGuideIds.has(guideId)) expandedGuideIds.delete(guideId);
+  else expandedGuideIds.add(guideId);
+  renderGuides();
+}
+function openGuidePdfViewer(guideId) {
+  const guide = findGuide(guideId);
+  const pdf = guide?.attachment && guide.attachment.type === 'pdf' ? guide.attachment : null;
+  if (!pdf?.dataUrl) {
+    showToast('这个指南没有 PDF 附件');
+    return;
+  }
+  currentPdfDataUrl = pdf.dataUrl;
+  document.getElementById('pdf-sheet-title').textContent = pdf.name || guide.title || 'PDF 预览';
+  document.getElementById('pdf-viewer-frame').src = `${pdf.dataUrl}#toolbar=0&navpanes=0&scrollbar=1`;
+  openSheet('sheet-pdf');
+}
+function openCurrentPdfInNewTab() {
+  if (!currentPdfDataUrl) {
+    showToast('当前没有可打开的 PDF');
+    return;
+  }
+  window.open(currentPdfDataUrl, '_blank');
+}
+
 function findProject(projId) {
   for (const d of state.departments) {
     const p = d.projects.find(x => x.id === projId);
     if (p) return { proj:p, dept:d };
   }
   return null;
+}
+
+function getProjectScheduleEntries(projectId) {
+  const entries = [];
+  (state.schedule || []).forEach(block => {
+    (block.items || []).forEach(item => {
+      if (item.projectId === projectId) {
+        entries.push({
+          blockId: block.id,
+          itemId: item.id,
+          blockLabel: block.period,
+          blockColor: block.color || 'var(--green)',
+          time: item.time || '未设时间',
+          task: item.task || '未命名行动',
+          checked: !!item.checked
+        });
+      }
+    });
+  });
+  return entries;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1289,6 +1728,7 @@ function switchTab(tab) {
   document.getElementById('tab-' + tab).classList.add('active');
   if (tab === 'today') renderToday();
   if (tab === 'system') renderDeptList();
+  if (tab === 'guides') renderGuides();
   if (tab === 'map') { setTimeout(renderMap, 80); }
   if (tab === 'vision') renderVision();
 }
@@ -1305,6 +1745,11 @@ function closeSheet(id) {
   const overlay = id.replace('sheet-','overlay-');
   document.getElementById(overlay)?.classList.remove('open');
   document.getElementById(id)?.classList.remove('open');
+  if (id === 'sheet-pdf') {
+    const frame = document.getElementById('pdf-viewer-frame');
+    if (frame) frame.src = 'about:blank';
+    currentPdfDataUrl = '';
+  }
   document.body.style.overflow = '';
 }
 
@@ -1965,6 +2410,572 @@ function mmToggle() {
   MM.showProj = !MM.showProj;
   document.getElementById('mm-toggle-btn').style.background = MM.showProj ? 'rgba(58,107,66,.15)' : '';
   renderMap();
+}
+
+
+// ═══════════════════════════════════════════════════════
+// EXTENDED FEATURES · GUIDES / EXPORT / TASK DELETE
+// ═══════════════════════════════════════════════════════
+
+function loadState() {
+  return dbGet('appState').then(saved => {
+    state = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+    if (!state.reflection) state.reflection = {};
+    if (!state.minVersion) state.minVersion = DEFAULT_DATA.minVersion;
+    if (!state.guides || !Array.isArray(state.guides)) {
+      state.guides = JSON.parse(JSON.stringify(DEFAULT_DATA.guides || []));
+    }
+    state.departments.forEach(dept => {
+      dept.projects.forEach(proj => {
+        if (!Array.isArray(proj.guideIds)) proj.guideIds = [];
+      });
+    });
+  }).catch(() => {
+    state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    state.departments.forEach(dept => dept.projects.forEach(proj => { if (!Array.isArray(proj.guideIds)) proj.guideIds = []; }));
+  });
+}
+
+function switchTab(tab) {
+  if (currentTab === tab) return;
+  currentTab = tab;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'today') renderToday();
+  if (tab === 'system') renderDeptList();
+  if (tab === 'guides') renderGuides();
+  if (tab === 'map') { setTimeout(renderMap, 80); }
+  if (tab === 'vision') renderVision();
+}
+
+function findGuide(guideId) {
+  return (state.guides || []).find(g => g.id === guideId) || null;
+}
+
+function deleteTask(blockId, itemId) {
+  const block = state.schedule.find(b => b.id === blockId);
+  if (!block) return;
+  block.items = block.items.filter(i => i.id !== itemId);
+  persist();
+  renderTasks();
+  updateProgress();
+  showToast('事项已删除');
+}
+
+function renderTasks() {
+  const container = document.getElementById('today-tasks');
+  container.innerHTML = '';
+
+  state.schedule.forEach(block => {
+    const wrap = document.createElement('div');
+    wrap.className = 'card'; wrap.style.marginBottom = '12px';
+
+    const header = document.createElement('div');
+    header.className = 'block-header';
+    const doneCount = block.items.filter(i=>i.checked).length;
+    header.innerHTML = `
+      <div class="block-dot" style="background:${block.color};"></div>
+      <span class="block-label">${block.period}</span>
+      <span class="block-time">${block.time_range}</span>
+      <span style="font-size:12px;color:var(--text-soft);margin-left:8px;">${doneCount}/${block.items.length}</span>`;
+    wrap.appendChild(header);
+
+    block.items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'task-item';
+
+      let modBtn = '';
+      if (item.projectId) {
+        const found = findProject(item.projectId);
+        if (found?.proj.dailyModule?.title) {
+          modBtn = `<button class="task-module-btn" style="color:${found.dept.colorHex};border-color:${found.dept.colorHex}44;background:${found.dept.colorHex}0D;" onclick="event.stopPropagation();openModuleSheet('${item.projectId}')">📋</button>`;
+        }
+      }
+
+      row.innerHTML = `
+        <div class="task-check ${item.checked?'done':''}" onclick="toggleTask('${block.id}','${item.id}')"></div>
+        <div class="task-body clickable" onclick="openTaskSheet('${block.id}','${item.id}')">
+          <div class="task-title ${item.checked?'done':''}">${item.task}</div>
+          <div class="task-meta">
+            ${item.time ? `<span class="task-time">${item.time}</span>` : ''}
+            ${item.source ? `<span style="color:${block.color};font-size:11.5px;">${item.source}</span>` : ''}
+            ${modBtn}
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="task-icon-btn danger" onclick="event.stopPropagation();deleteTask('${block.id}','${item.id}')" title="删除事项">🗑</button>
+        </div>`;
+      wrap.appendChild(row);
+    });
+
+    const addRow = document.createElement('div');
+    addRow.className = 'add-row';
+    addRow.innerHTML = `<span class="add-row-icon">＋</span>添加事项`;
+    addRow.onclick = () => openTaskSheet(block.id, null);
+    wrap.appendChild(addRow);
+
+    container.appendChild(wrap);
+  });
+}
+
+function renderProjectGuidePicker(selectedIds = []) {
+  const box = document.getElementById('proj-guide-picker');
+  if (!box) return;
+  const guides = state.guides || [];
+  if (!guides.length) {
+    box.innerHTML = '<div style="padding:8px 4px;color:var(--text-soft);font-size:13px;">还没有指南，先新建一条即可。</div>';
+    return;
+  }
+  box.innerHTML = guides.map(g => `
+    <label class="guide-picker-item">
+      <input type="checkbox" class="proj-guide-check" value="${g.id}" ${selectedIds.includes(g.id) ? 'checked' : ''}>
+      <div>
+        <div class="guide-picker-title">${g.title}</div>
+        <div class="guide-picker-sub">${g.category || '未分类'}</div>
+      </div>
+    </label>`).join('');
+}
+
+function getSelectedProjectGuideIds() {
+  return Array.from(document.querySelectorAll('.proj-guide-check:checked')).map(el => el.value);
+}
+
+function renderDeptDetail(dept) {
+  const c = document.getElementById('detail-content');
+  c.innerHTML = '';
+
+  const goalSection = document.createElement('div');
+  goalSection.className = 'section-gap';
+  goalSection.innerHTML = `<div class="section-label">🎯 部门目标</div>`;
+  const goalsCard = document.createElement('div');
+  goalsCard.className = 'card';
+  goalsCard.innerHTML = `
+    <div class="goals-row">
+      <div class="goal-item" style="background:${dept.bgHex};">
+        <div class="goal-tag" style="color:${dept.colorHex};">🟢 短期目标 · 1-3个月</div>
+        <div class="goal-text">${dept.goals.short}</div>
+      </div>
+      <div class="goal-item" style="background:${dept.bgHex}88;">
+        <div class="goal-tag" style="color:${dept.colorHex}99;">🔵 中期目标 · 3-12个月</div>
+        <div class="goal-text">${dept.goals.mid}</div>
+      </div>
+      <div class="goal-item" style="background:${dept.bgHex}44;">
+        <div class="goal-tag" style="color:${dept.colorHex}77;">⭐ 长期目标 · 1年以上</div>
+        <div class="goal-text">${dept.goals.long}</div>
+      </div>
+    </div>`;
+  goalSection.appendChild(goalsCard);
+  c.appendChild(goalSection);
+
+  const statusGroups = [
+    {status:'active', label:'🔵 进行中', color: dept.colorHex},
+    {status:'planned', label:'🌱 计划中', color:'#9A5E1E'},
+    {status:'done', label:'✅ 已完成', color:'#888'}
+  ];
+
+  statusGroups.forEach(g => {
+    const items = dept.projects.filter(p=>p.status===g.status);
+    const section = document.createElement('div');
+    section.className = 'section-gap';
+    section.innerHTML = `<div class="section-label" style="color:${g.color};">${g.label}</div>`;
+
+    if (!items.length) {
+      section.insertAdjacentHTML('beforeend', '<div class="guides-empty">这个状态下还没有项目，可以先新增一个。</div>');
+    }
+
+    items.forEach(proj => {
+      const hasMod = proj.dailyModule?.title;
+      const guideList = (proj.guideIds || []).map(findGuide).filter(Boolean);
+      const linkedTasks = getProjectScheduleEntries(proj.id);
+      const statusLabel = g.status === 'active' ? '进行中' : g.status === 'planned' ? '计划中' : '已完成';
+      const statusDot = g.status==='active' ? dept.colorHex : g.status==='planned' ? '#D4975A' : '#C0B8B0';
+      const card = document.createElement('div');
+      card.className = 'card proj-card proj-card-redesign';
+      card.innerHTML = `
+        <div class="proj-card-topline">
+          <div class="proj-card-title-wrap">
+            <div class="proj-card-title">${escapeHtml(proj.name)}</div>
+            <div class="proj-card-subtitle">
+              <span class="proj-status-dot" style="background:${statusDot};"></span>
+              <span>${dept.emoji} ${statusLabel}</span>
+              ${hasMod ? `<span class="proj-chip" style="background:${dept.bgHex};color:${dept.colorHex};border-color:${dept.colorHex}22;">📋 已关联实践模块</span>` : ''}
+              ${guideList.length ? `<span class="proj-chip">📚 ${guideList.length} 条指南</span>` : ''}
+            </div>
+          </div>
+          <div class="proj-card-badge">${linkedTasks.length} 个今日行动</div>
+        </div>
+        <div class="proj-card-desc">${escapeHtml(proj.desc || '暂无描述')}</div>
+
+        <div class="proj-linked-section">
+          <div class="proj-linked-head">
+            <span>🗓 关联的今日行动</span>
+            <span class="proj-linked-count">${linkedTasks.length ? `点击可查看 / 编辑` : '暂无绑定'}</span>
+          </div>
+          ${linkedTasks.length ? `
+            <div class="proj-linked-list">
+              ${linkedTasks.map(linked => `
+                <div class="proj-linked-item ${linked.checked ? 'done' : ''}" onclick="switchTab('today');setTimeout(()=>openTaskSheet('${linked.blockId}','${linked.itemId}'),80)">
+                  <div class="proj-linked-time" style="color:${linked.blockColor};background:${linked.blockColor}14;border-color:${linked.blockColor}24;">${escapeHtml(linked.time)}</div>
+                  <div class="proj-linked-body">
+                    <div class="proj-linked-task">${escapeHtml(linked.task)}</div>
+                    <div class="proj-linked-sub">${escapeHtml(linked.blockLabel)} · ${linked.checked ? '已完成' : '待执行'}</div>
+                  </div>
+                </div>`).join('')}
+            </div>` : `<div class="proj-linked-empty">这个项目还没有绑定到“今日”里的行动。你可以去今日页面编辑某个事项，把它关联到当前项目。</div>`}
+        </div>
+
+        ${guideList.length ? `<div class="proj-guides">${guideList.map(guide => `<button class="guide-chip" onclick="openGuideSheet('${guide.id}')">📖 ${escapeHtml(guide.title)}</button>`).join('')}</div>` : ''}
+        <div class="proj-card-actions proj-card-footer">
+          <button class="proj-card-btn" onclick="openProjSheet('${dept.id}','${proj.id}')">✏️ 编辑项目</button>
+          ${hasMod ? `<button class="proj-card-btn primary" onclick="openModuleSheet('${proj.id}')">📋 查看模块</button>` : `<button class="proj-card-btn primary" onclick="openModuleEditSheet('${proj.id}')">＋ 添加模块</button>`}
+        </div>`;
+      section.appendChild(card);
+    });
+
+    const addCard = document.createElement('div');
+    addCard.className = 'card';
+    addCard.innerHTML = `<div class="add-row"><span class="add-row-icon">＋</span>添加${g.label.replace(/^[🔵🌱✅]\s/,'')}项目</div>`;
+    addCard.querySelector('.add-row').onclick = () => openNewProjSheet(dept.id, g.status);
+    section.appendChild(addCard);
+
+    c.appendChild(section);
+  });
+
+  c.insertAdjacentHTML('beforeend', '<div style="height:8px;"></div>');
+}
+
+function openProjSheet(deptId, projId) {
+  const dept = state.departments.find(d=>d.id===deptId);
+  const proj = dept.projects.find(p=>p.id===projId);
+  document.getElementById('proj-dept-id').value = deptId;
+  document.getElementById('proj-proj-id').value = projId;
+  document.getElementById('proj-sheet-title').textContent = proj.name;
+  document.getElementById('proj-name').value = proj.name;
+  document.getElementById('proj-status').value = proj.status;
+  document.getElementById('proj-desc').value = proj.desc;
+  renderProjectGuidePicker(proj.guideIds || []);
+  openSheet('sheet-proj');
+}
+
+function openNewProjSheet(deptId, status='active') {
+  document.getElementById('proj-dept-id').value = deptId;
+  document.getElementById('proj-proj-id').value = '';
+  document.getElementById('proj-sheet-title').textContent = '添加新项目';
+  document.getElementById('proj-name').value = '';
+  document.getElementById('proj-status').value = status;
+  document.getElementById('proj-desc').value = '';
+  renderProjectGuidePicker([]);
+  openSheet('sheet-proj');
+}
+
+function saveProject() {
+  const deptId = document.getElementById('proj-dept-id').value;
+  const projId = document.getElementById('proj-proj-id').value;
+  const name = document.getElementById('proj-name').value.trim();
+  const status = document.getElementById('proj-status').value;
+  const desc = document.getElementById('proj-desc').value.trim();
+  const guideIds = getSelectedProjectGuideIds();
+  if (!name) { showToast('请填写项目名称'); return; }
+  const dept = state.departments.find(d=>d.id===deptId);
+  if (projId) {
+    const proj = dept.projects.find(p=>p.id===projId);
+    proj.name = name; proj.status = status; proj.desc = desc; proj.guideIds = guideIds;
+  } else {
+    dept.projects.push({id:uid(), name, status, desc, guideIds});
+  }
+  persist(); closeSheet('sheet-proj');
+  renderDeptDetail(dept);
+  if (currentTab === 'guides') renderGuides();
+  showToast(projId ? '项目已更新' : '项目已添加');
+}
+
+function openGuideSheet(guideId = '', projectId = null) {
+  pendingGuideLinkProjectId = projectId || null;
+  const guide = guideId ? findGuide(guideId) : null;
+  const attachment = guide?.attachment || null;
+  document.getElementById('guide-id').value = guide?.id || '';
+  document.getElementById('guide-sheet-title').textContent = guide ? '编辑指南' : '添加指南';
+  document.getElementById('guide-title').value = guide?.title || '';
+  document.getElementById('guide-category').value = guide?.category || '';
+  document.getElementById('guide-content').value = guide?.content || '';
+  document.getElementById('guide-attachment-name').value = attachment?.name || '';
+  document.getElementById('guide-attachment-type').value = attachment?.type || '';
+  document.getElementById('guide-attachment-mime').value = attachment?.mime || '';
+  document.getElementById('guide-attachment-data').value = attachment?.dataUrl || '';
+  const fileInput = document.getElementById('guide-file-input');
+  if (fileInput) fileInput.value = '';
+  updateGuideFileMeta();
+  openSheet('sheet-guide');
+}
+
+function saveGuide() {
+  const existingChecks = getSelectedProjectGuideIds();
+  const id = document.getElementById('guide-id').value;
+  const title = document.getElementById('guide-title').value.trim();
+  const category = document.getElementById('guide-category').value.trim();
+  const content = document.getElementById('guide-content').value.trim();
+  const attachmentName = document.getElementById('guide-attachment-name').value;
+  const attachmentType = document.getElementById('guide-attachment-type').value;
+  const attachmentMime = document.getElementById('guide-attachment-mime').value;
+  const attachmentData = document.getElementById('guide-attachment-data').value;
+  if (!title) { showToast('请填写指南标题'); return; }
+  if (!content && !attachmentName) { showToast('请填写文字内容或导入文件'); return; }
+
+  const attachment = attachmentName ? {
+    name: attachmentName,
+    type: attachmentType || 'file',
+    mime: attachmentMime || '',
+    dataUrl: attachmentData || ''
+  } : null;
+
+  let guideId = id;
+  if (id) {
+    const guide = findGuide(id);
+    if (guide) {
+      guide.title = title;
+      guide.category = category;
+      guide.content = content;
+      if (attachment) guide.attachment = attachment;
+      else delete guide.attachment;
+    }
+  } else {
+    guideId = uid();
+    state.guides.unshift({ id: guideId, title, category, content, ...(attachment ? { attachment } : {}) });
+  }
+
+  if (pendingGuideLinkProjectId) {
+    const found = findProject(pendingGuideLinkProjectId);
+    if (found) {
+      if (!Array.isArray(found.proj.guideIds)) found.proj.guideIds = [];
+      if (!found.proj.guideIds.includes(guideId)) found.proj.guideIds.push(guideId);
+    }
+  }
+
+  persist();
+  closeSheet('sheet-guide');
+  renderProjectGuidePicker(Array.from(new Set(existingChecks.concat(guideId).filter(Boolean))));
+  if (currentDeptId) renderDeptDetail(state.departments.find(d => d.id === currentDeptId));
+  if (currentTab === 'guides') renderGuides();
+  pendingGuideLinkProjectId = null;
+  showToast(id ? '指南已更新' : '指南已添加');
+}
+
+function deleteGuide(guideId) {
+  state.guides = (state.guides || []).filter(g => g.id !== guideId);
+  expandedGuideIds.delete(guideId);
+  state.departments.forEach(dept => {
+    dept.projects.forEach(proj => {
+      proj.guideIds = (proj.guideIds || []).filter(id => id !== guideId);
+    });
+  });
+  persist();
+  renderGuides();
+  if (currentDeptId) renderDeptDetail(state.departments.find(d => d.id === currentDeptId));
+  showToast('指南已删除');
+}
+
+function renderGuides() {
+  const c = document.getElementById('guides-list');
+  if (!c) return;
+  c.innerHTML = '';
+  c.className = 'guides-stack';
+  const guides = state.guides || [];
+  if (!guides.length) {
+    c.className = '';
+    c.innerHTML = '<div class="guides-empty">还没有指南。你可以把营养食谱、动作要领、恢复提醒、知识笔记或 PDF 资料都存到这里，后续也能关联到项目卡片。</div>';
+    return;
+  }
+  guides.forEach(guide => {
+    const linkedProjects = [];
+    state.departments.forEach(dept => dept.projects.forEach(proj => {
+      if ((proj.guideIds || []).includes(guide.id)) linkedProjects.push(`${dept.emoji} ${proj.name}`);
+    }));
+    const isExpanded = expandedGuideIds.has(guide.id);
+    const hasPdf = guide.attachment?.type === 'pdf' && !!guide.attachment?.dataUrl;
+    const hasTextAttachment = guide.attachment?.type === 'text';
+    const preview = (guide.content || '').replace(/\s+/g, ' ').slice(0, 42);
+
+    const card = document.createElement('div');
+    card.className = `guide-card-v2${isExpanded ? ' expanded' : ''}`;
+    card.innerHTML = `
+      <button class="guide-card-toggle" type="button" onclick="toggleGuideExpand('${guide.id}')">
+        <div class="guide-card-icon">📖</div>
+        <div class="guide-card-head">
+          <div class="guide-card-title-line">
+            <div class="guide-card-title">${escapeHtml(guide.title)}</div>
+            ${hasPdf ? '<span class="guide-file-badge">PDF</span>' : ''}
+            ${hasTextAttachment ? '<span class="guide-file-badge">TXT</span>' : ''}
+          </div>
+          <div class="guide-card-cat">${escapeHtml(guide.category || '未分类')}</div>
+          <div class="guide-card-preview">${isExpanded ? '点击上方可收起详情' : (preview ? escapeHtml(preview) + (guide.content.length > 42 ? '…' : '') : '点击展开查看详情')}</div>
+        </div>
+        <div class="guide-card-chevron">⌄</div>
+      </button>
+      <div class="guide-card-detail">
+        <div class="guide-card-body">${formatGuideContent(guide.content || (hasPdf ? '此指南包含 PDF 附件，可在下方打开查看。' : '暂无文字内容。'))}</div>
+        ${guide.attachment ? `
+          <div class="guide-file-panel">
+            <div class="guide-file-name">📎 ${escapeHtml(guide.attachment.name || '附件')}</div>
+            <div class="guide-file-meta">${hasPdf ? 'PDF 文件 · 支持在 App 内查看' : '文本文件已导入'}</div>
+            ${hasPdf ? `<div class="guide-file-inline-actions"><button class="guide-action-btn primary" onclick="event.stopPropagation();openGuidePdfViewer('${guide.id}')">打开 PDF</button></div>` : ''}
+          </div>` : ''}
+        ${linkedProjects.length ? `<div class="proj-guides" style="margin-top:12px;">${linkedProjects.slice(0,6).map(name => `<span class="proj-chip">${escapeHtml(name)}</span>`).join('')}</div>` : ''}
+        <div class="guide-card-actions">
+          <button class="guide-action-btn" onclick="event.stopPropagation();openGuideSheet('${guide.id}')">✏️ 编辑</button>
+          ${hasPdf ? `<button class="guide-action-btn" onclick="event.stopPropagation();openGuidePdfViewer('${guide.id}')">📄 查看PDF</button>` : ''}
+          <button class="guide-action-btn primary" onclick="event.stopPropagation();exportGuideImage('${guide.id}')">⤓ 导出</button>
+          <button class="guide-action-btn" onclick="event.stopPropagation();deleteGuide('${guide.id}')">🗑 删除</button>
+        </div>
+      </div>`;
+    c.appendChild(card);
+  });
+
+  const addCard = document.createElement('div');
+  addCard.className = 'card';
+  addCard.innerHTML = '<div class="add-row"><span class="add-row-icon">＋</span>添加新指南 / 导入 PDF</div>';
+  addCard.querySelector('.add-row').onclick = () => openGuideSheet();
+  c.appendChild(addCard);
+}
+
+async function exportNodeAsImage(node, filename) {
+  if (!window.html2canvas) {
+    showToast('导出组件未加载完成，请稍后重试');
+    return;
+  }
+  try {
+    const canvas = await window.html2canvas(node, {
+      backgroundColor: '#FAF7F2',
+      scale: Math.min(window.devicePixelRatio || 2, 3),
+      useCORS: true,
+      logging: false
+    });
+    const dataUrl = canvas.toDataURL('image/png');
+    const isIOSDevice = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIOSDevice) {
+      const w = window.open('', '_blank');
+      if (w) {
+        w.document.write(`<title>${filename}</title><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;"><img src="${dataUrl}" style="max-width:100%;height:auto;"></body>`);
+        showToast('图片已打开，长按即可保存');
+      } else {
+        showToast('请允许弹窗后再导出');
+      }
+    } else {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `${filename}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('图片已导出');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('导出失败，请重试');
+  } finally {
+    if (node?.dataset?.tempExport === '1') node.remove();
+  }
+}
+
+function createExportShell(title, subtitle) {
+  const node = document.createElement('div');
+  node.dataset.tempExport = '1';
+  node.style.position = 'fixed';
+  node.style.left = '-99999px';
+  node.style.top = '0';
+  node.style.width = '720px';
+  node.style.padding = '28px';
+  node.style.background = '#FAF7F2';
+  node.style.color = '#1C1814';
+  node.style.fontFamily = 'Noto Sans SC, -apple-system, sans-serif';
+  node.innerHTML = `
+    <div style="border-radius:20px;padding:22px;background:linear-gradient(135deg,#3A6B42 0%,#2E547A 100%);color:#fff;margin-bottom:16px;">
+      <div style="font-size:14px;opacity:.72;">${subtitle}</div>
+      <div style="font-size:28px;font-weight:700;margin-top:6px;">${title}</div>
+    </div>`;
+  document.body.appendChild(node);
+  return node;
+}
+
+function exportTodayImage() {
+  const now = new Date();
+  const days = ['日','一','二','三','四','五','六'];
+  const subtitle = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · 周${days[now.getDay()]}`;
+  const node = createExportShell('今日计划', subtitle);
+  state.schedule.forEach(block => {
+    const card = document.createElement('div');
+    card.style.background = '#fff';
+    card.style.border = '1px solid #D8CFBF';
+    card.style.borderRadius = '16px';
+    card.style.marginBottom = '12px';
+    card.style.overflow = 'hidden';
+    let itemsHtml = '';
+    (block.items || []).forEach(item => {
+      itemsHtml += `
+        <div style="display:flex;gap:12px;padding:12px 16px;border-top:1px solid #E8DFD0;align-items:flex-start;">
+          <div style="width:22px;height:22px;border-radius:999px;border:2px solid ${item.checked ? '#3A6B42' : '#D8CFBF'};background:${item.checked ? '#3A6B42' : 'transparent'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">${item.checked ? '✓' : ''}</div>
+          <div style="flex:1;">
+            <div style="font-size:16px;font-weight:600;${item.checked ? 'text-decoration:line-through;color:#9A8E84;' : ''}">${item.task}</div>
+            <div style="font-size:12px;color:#9A8E84;margin-top:3px;">${[item.time, item.source].filter(Boolean).join(' · ')}</div>
+          </div>
+        </div>`;
+    });
+    card.innerHTML = `
+      <div style="padding:12px 16px;background:#F3EEE6;display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700;color:#5A4F45;"><span style="width:8px;height:8px;border-radius:999px;background:${block.color};display:inline-block;"></span>${block.period}</div>
+        <div style="font-size:12px;color:#9A8E84;">${block.time_range}</div>
+      </div>
+      ${itemsHtml}`;
+    node.appendChild(card);
+  });
+  exportNodeAsImage(node, 'life-restart-today-plan');
+}
+
+function buildGuideExportNode(guides, title = '指南') {
+  const node = createExportShell(title, `共 ${guides.length} 条内容`);
+  guides.forEach(guide => {
+    const card = document.createElement('div');
+    card.style.background = '#fff';
+    card.style.border = '1px solid #D8CFBF';
+    card.style.borderRadius = '16px';
+    card.style.padding = '18px';
+    card.style.marginBottom = '12px';
+    card.innerHTML = `
+      <div style="font-size:20px;font-weight:700;">${guide.title}</div>
+      <div style="display:inline-flex;margin-top:8px;padding:4px 10px;border-radius:999px;background:#F8EDDA;color:#9A5E1E;font-size:12px;font-weight:700;">${guide.category || '未分类'}</div>
+      <div style="margin-top:12px;font-size:14px;line-height:1.9;color:#5A4F45;white-space:pre-wrap;">${guide.content}</div>`;
+    node.appendChild(card);
+  });
+  return node;
+}
+
+function exportGuideImage(guideId) {
+  const guide = findGuide(guideId);
+  if (!guide) { showToast('未找到该指南'); return; }
+  const node = buildGuideExportNode([guide], guide.title);
+  exportNodeAsImage(node, `guide-${guide.title}`);
+}
+
+function exportCurrentGuideImage() {
+  const id = document.getElementById('guide-id').value;
+  if (id) {
+    exportGuideImage(id);
+    return;
+  }
+  const title = document.getElementById('guide-title').value.trim();
+  const category = document.getElementById('guide-category').value.trim();
+  const content = document.getElementById('guide-content').value.trim();
+  if (!title || !content) { showToast('先填写标题和内容再导出'); return; }
+  const node = buildGuideExportNode([{ title, category, content }], title);
+  exportNodeAsImage(node, `guide-${title}`);
+}
+
+function exportGuidesImage() {
+  const guides = state.guides || [];
+  if (!guides.length) { showToast('暂无可导出的指南'); return; }
+  const node = buildGuideExportNode(guides, '指南总览');
+  exportNodeAsImage(node, 'life-restart-guides');
 }
 
 // ═══════════════════════════════════════════════════════
